@@ -28,6 +28,8 @@ public class CharacterMover : MonoBehaviour
         moveInput.x = Input.GetAxis("Horizontal");
         moveInput.y = Input.GetAxis("Vertical");
         jumpInput = jumpInput == false ? Input.GetButton("Jump") : true;
+
+        animator.SetBool("Crouch", Input.GetButton("Crouch"));
     }
 
     void FixedUpdate()
