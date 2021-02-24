@@ -22,6 +22,11 @@ public class CameraController : MonoBehaviour
     [Tooltip("The transform of the head of the model")]
     public Transform trueParent = null;
     /// <summary>
+    /// The transform of the neck bone. Used to rotate the head to stop the camera seeing the head
+    /// </summary>
+    [Tooltip("The transform of the neck bone.")]
+    public Transform neckTransform = null;
+    /// <summary>
     /// The vertical offset from the center of the head of the model
     /// </summary>
     [Tooltip("The vertical offset from the center of the head of the model")]
@@ -31,6 +36,10 @@ public class CameraController : MonoBehaviour
     /// </summary>
     [Range(0, 90)]
     public float maxAngle = 70;
+    /// <summary>
+    /// A storage location for the head's angle
+    /// </summary>
+    private Vector3 headAngle = new Vector3();
     /// <summary>
     /// Disables the players mouse cursor
     /// </summary>
@@ -61,6 +70,7 @@ public class CameraController : MonoBehaviour
                 dx = maxAngle;
 
             angles.x = dx;
+            headAngle = angles;
 
             Vector3 parentAngle = parentTrans.eulerAngles;
             parentAngle.y += dy * speed * Time.deltaTime;
@@ -68,9 +78,19 @@ public class CameraController : MonoBehaviour
 
             angles.y = parentAngle.y;
 
+
             transform.eulerAngles = angles;
         }
         if (Input.GetKeyDown(KeyCode.Escape))
             Cursor.lockState = Cursor.lockState == CursorLockMode.None ? CursorLockMode.Locked : CursorLockMode.None;
+    }
+    /// <summary>
+    /// Updates the neck bone of the player so looking directly up won't reveal the players head.
+    /// </summary>
+    private void LateUpdate()
+    {
+        Vector3 testAng = neckTransform.eulerAngles;
+        testAng.x += headAngle.x;
+        neckTransform.eulerAngles = testAng;
     }
 }
