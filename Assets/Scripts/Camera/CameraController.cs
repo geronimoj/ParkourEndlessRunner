@@ -5,6 +5,9 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     public float speed = 1000;
+    public Transform parentTrans = null;
+    public Transform trueParent = null;
+    public Vector3 trueParentOffset = new Vector3();
 
     [Range(0, 90)]
     public float maxAngle = 70;
@@ -15,13 +18,14 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (trueParent != null)
+            transform.position = trueParent.position + trueParentOffset;
+
         if (Cursor.lockState == CursorLockMode.Locked)
         {
             Vector3 angles = transform.eulerAngles;
             float dx = -Input.GetAxis("Mouse Y");
             float dy = Input.GetAxis("Mouse X");
-            float dxDir = dx < 0 ? -1 : 1;
-            // Debug.Log(dxDir);
 
             dx = angles.x + dx * speed * Time.deltaTime;
 
@@ -33,7 +37,12 @@ public class CameraController : MonoBehaviour
 
             angles.x = dx;
 
-            angles.y += dy * speed * Time.deltaTime;
+            Vector3 parentAngle = parentTrans.eulerAngles;
+            parentAngle.y += dy * speed * Time.deltaTime;
+            parentTrans.eulerAngles = parentAngle;
+
+            angles.y = parentAngle.y;
+
             transform.eulerAngles = angles;
         }
         if (Input.GetKeyDown(KeyCode.Escape))
