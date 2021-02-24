@@ -174,7 +174,7 @@ MonoBehaviour:
   speed: 2000
   parentTrans: {fileID: 15723218886475979}
   trueParent: {fileID: 2589901306340597348}
-  testTransform: {fileID: 1128308840135156376}
+  neckTransform: {fileID: 1128308840135156376}
   trueParentOffset: 0.1
   maxAngle: 70
 --- !u!1 &4706451180346785077
