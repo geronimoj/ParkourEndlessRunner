@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,22 +25,10 @@ public class Ragdoll : MonoBehaviour
         set
         {
             animator.enabled = !value;
-#if DEBUG
-            ragdollOn = value; 
-#endif
             foreach (Rigidbody r in rigidbodies)
                 r.isKinematic = !value;
         }
     }
-#if DEBUG
-    /// <summary>
-    /// Store the a boolean to allow for toggling of the ragdoll from the inspector.
-    /// FOR DEBUGGING ONLY.
-    /// </summary>
-    [SerializeField]
-    [Tooltip("Toggles the ragdoll state from the inspector")]
-    private bool ragdollOn = false;
-#endif
     /// <summary>
     /// Initialises the class and finds the rigidbodies
     /// </summary>
@@ -56,12 +43,12 @@ public class Ragdoll : MonoBehaviour
     }
 #if DEBUG
     /// <summary>
-    /// Sets the ragdoll state for inspector debugging
+    /// Toggles the ragdoll for debugging purposes.
     /// </summary>
-    private void Update()
+    [ContextMenu("Toggle Ragdoll")]
+    private void ToggleRagdoll()
     {
-        if (ragdollOn != RagdollOn)
-            RagdollOn = ragdollOn;
+        RagdollOn = !RagdollOn;
     }
 #endif
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 /// <summary>
 /// Moves and controls the character. The true movement is done by the Character controller
 /// </summary>
