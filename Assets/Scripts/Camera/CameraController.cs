@@ -28,7 +28,7 @@ public class CameraController : MonoBehaviour
     /// The vertical offset from the center of the head of the model
     /// </summary>
     [Tooltip("The vertical offset from the center of the head of the model")]
-    public float trueParentOffset = 0.1f;
+    public Vector3 trueParentOffset = new Vector3();
     /// <summary>
     /// The maximum angle the player can look up and down
     /// </summary>
@@ -51,7 +51,7 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         if (trueParent != null)
-            transform.position = trueParent.position + transform.up * trueParentOffset;
+            transform.position = trueParent.position + trueParent.up * trueParentOffset.y + trueParent.forward * trueParentOffset.z + trueParent.right * trueParentOffset.x;
 
         if (Cursor.lockState == CursorLockMode.Locked)
         {
