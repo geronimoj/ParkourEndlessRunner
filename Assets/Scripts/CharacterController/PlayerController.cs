@@ -109,14 +109,20 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private Vector3 test;
 #endif
-
+    /// <summary>
+    /// The colliders that should be ignored when moving. This adds child colliders by default
+    /// </summary>
     public List<Collider> collidersToIgnore = new List<Collider>();
-
+    /// <summary>
+    /// Is true if the controller is on the ground
+    /// </summary>
     public bool OnGround
     {
         get { return colInfo.OnGround; }
     }
-
+    /// <summary>
+    /// Sets the transform and adds child colliders to colliders to ignore
+    /// </summary>
     private void Start()
     {
         colInfo.SetTransform(transform);
@@ -185,9 +191,7 @@ public class PlayerController : MonoBehaviour
                     }
                     //This is just to make sure that the last hit check actually gets updated
                     if (updateHitInfo)
-                    {
                         hits = MoveToRaycasts(dir, out offsetIndex);
-                    }
                 }
                 else
                 {
