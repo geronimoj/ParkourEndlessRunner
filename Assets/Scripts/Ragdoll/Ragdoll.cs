@@ -16,6 +16,7 @@ public class Ragdoll : MonoBehaviour
     /// A list of the rigidbodies on the ragdoll. This is automatically calculated
     /// </summary>
     private List<Rigidbody> rigidbodies = new List<Rigidbody>();
+    private Collider[] colliders;
     /// <summary>
     /// Sets or returns the state of the ragdoll
     /// </summary>
@@ -27,6 +28,8 @@ public class Ragdoll : MonoBehaviour
             animator.enabled = !value;
             foreach (Rigidbody r in rigidbodies)
                 r.isKinematic = !value;
+            foreach (Collider c in colliders)
+                c.enabled = value;
         }
     }
     /// <summary>
@@ -37,9 +40,9 @@ public class Ragdoll : MonoBehaviour
         animator = GetComponent<Animator>();
 
         rigidbodies = GetComponentsInChildren<Rigidbody>().OfType<Rigidbody>().ToList();
+        colliders = GetComponentsInChildren<Collider>();
 
-        foreach (Rigidbody r in rigidbodies)
-            r.isKinematic = true;
+        RagdollOn = false;
     }
 #if DEBUG
     /// <summary>

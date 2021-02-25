@@ -139,7 +139,7 @@ public class PlayerController : MonoBehaviour
         test = dir;
 #endif
         RaycastHit[] hits;
-        //Make sure we have a direction to move in
+        //Make sure we have a direction to move in//
         if (dir != Vector3.zero)
         {
             //Get the collisions
