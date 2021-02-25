@@ -175,8 +175,8 @@ MonoBehaviour:
   parentTrans: {fileID: 15723218886475979}
   trueParent: {fileID: 2589901306340597348}
   neckTransform: {fileID: 1128308840135156376}
-  trueParentOffset: 0.1
-  maxAngle: 70
+  trueParentOffset: {x: 0, y: 0.1, z: 0}
+  maxAngle: 90
 --- !u!54 &9181817482889234320
 Rigidbody:
   m_ObjectHideFlags: 0

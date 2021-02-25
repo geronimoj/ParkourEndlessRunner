@@ -38,13 +38,13 @@ public class CharacterMover : MonoBehaviour
     /// A reference to the character controller.
     /// The character controller is used to me the player
     /// </summary>
-    protected CharacterController cc = null;
+    protected PlayerController cc = null;
     /// <summary>
     /// Gets references to other components
     /// </summary>
     void Awake()
     {
-        cc = GetComponent<CharacterController>();
+        cc = GetComponent<PlayerController>();
         animator = transform.GetChild(0).GetComponent<Animator>();
     }
     /// <summary>
@@ -63,7 +63,7 @@ public class CharacterMover : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-        bool isGrounded = cc.isGrounded;
+        bool isGrounded = cc.OnGround;
         Vector3 forwards = Vector3.Cross(transform.right, Vector3.up);
         Vector3 delta = (moveInput.x * transform.right + moveInput.y * forwards) * speed;
 
@@ -99,7 +99,7 @@ public class CharacterMover : MonoBehaviour
                 velocity -= 0.2f * hozHitDir / displacement;
         }
 
-        cc.Move(velocity * Time.fixedDeltaTime);
+        cc.MoveTo(velocity * Time.fixedDeltaTime);
     }
     /// <summary>
     /// Get hitDir

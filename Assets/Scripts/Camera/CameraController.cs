@@ -38,6 +38,8 @@ public class CameraController : MonoBehaviour
     /// A storage location for the head's angle
     /// </summary>
     private Vector3 headAngle = new Vector3();
+
+    public bool followHead = false;
     /// <summary>
     /// Disables the players mouse cursor
     /// </summary>
@@ -53,9 +55,10 @@ public class CameraController : MonoBehaviour
         if (trueParent != null)
             transform.position = trueParent.position + trueParent.up * trueParentOffset.y + trueParent.forward * trueParentOffset.z + trueParent.right * trueParentOffset.x;
 
+        Vector3 angles = transform.eulerAngles;
+
         if (Cursor.lockState == CursorLockMode.Locked)
         {
-            Vector3 angles = transform.eulerAngles;
             float dx = -Input.GetAxis("Mouse Y");
             float dy = Input.GetAxis("Mouse X");
 
@@ -75,10 +78,13 @@ public class CameraController : MonoBehaviour
             parentTrans.eulerAngles = parentAngle;
 
             angles.y = parentAngle.y;
-
-
-            transform.eulerAngles = angles;
         }
+
+        if (!followHead)
+            angles.z = 0;
+
+        transform.eulerAngles = angles;
+
         if (Input.GetKeyDown(KeyCode.Escape))
             Cursor.lockState = Cursor.lockState == CursorLockMode.None ? CursorLockMode.Locked : CursorLockMode.None;
     }
@@ -87,8 +93,15 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void LateUpdate()
     {
-        Vector3 testAng = neckTransform.eulerAngles;
-        testAng.x += headAngle.x;
-        neckTransform.eulerAngles = testAng;
+        if (!followHead)
+        {
+            Vector3 testAng = neckTransform.eulerAngles;
+            testAng.x += headAngle.x;
+            neckTransform.eulerAngles = testAng;
+        }
+        else
+        {
+            transform.eulerAngles = trueParent.eulerAngles;
+        }
     }
 }
