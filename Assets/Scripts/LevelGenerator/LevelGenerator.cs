@@ -51,6 +51,18 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     public List<TileInfo> m_tiles = new List<TileInfo>();
     /// <summary>
+    /// The min number of tiles between obstacle spawns
+    /// </summary>
+    public uint minSpaceBetweenObstacles = 2;
+    /// <summary>
+    /// The max number of tiles between obstacle spawns
+    /// </summary>
+    public uint maxSpaceBetweenObstacles = 4;
+    /// <summary>
+    /// All of the obstacles you want to be able to spawn
+    /// </summary>
+    public GameObject[] obstacles;
+    /// <summary>
     /// The probability for the height of a lane to change
     /// </summary>
     [Range(0,1)]
@@ -60,6 +72,8 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     [Range(0,1)]
     public float m_probabilityForNonRequiredRamps = 0.5f;
+
+    private uint[] laneObstacleTimer = new uint[0];
     /// <summary>
     /// Generates a level upon starting the game for debugging purposes
     /// </summary>
@@ -75,6 +89,12 @@ public class LevelGenerator : MonoBehaviour
     {   //If we already have tiles and are trying to generate more, delete the previous ones. Primarily for debugging
         if (m_tiles.Count != 0)
             DeleteLevel();
+
+        if (laneObstacleTimer.Length != m_numberOfLanes)
+            laneObstacleTimer = new uint[m_numberOfLanes];
+
+        for (int lane = 0; lane < m_numberOfLanes; lane++)
+            laneObstacleTimer[lane] = (uint)Random.Range((int)minSpaceBetweenObstacles, (int)maxSpaceBetweenObstacles);
 
         GameObject obstacle = null;
         bool canChangeHeight;
@@ -157,8 +177,35 @@ public class LevelGenerator : MonoBehaviour
                     }
                     m_tiles[i * (int)m_numberOfLanes + lane] = current;
                 }
+            //Instantiate any obstacles to slide or vault over
+            //Make sure we have obstacles
+            if (obstacles.Length != 0)
+                //Decrement the timers if they haven't already reached 0
+                for (int lane = 0; lane < m_numberOfLanes; lane++)
+                {
+                    int currentTile = i * (int)m_numberOfLanes + lane;
+                    if (m_tiles[currentTile].IsRamp)
+                        continue;
 
-                //Actually generate the lanes boxes and stuff
+                    if (laneObstacleTimer[lane] != 0)
+                        laneObstacleTimer[lane]--;
+                    //If they have reached 0, check if we can spawn an obstacle on that tile
+                    else
+                    {
+                        //Select a random obstacle to spawn
+                        obstacle = obstacles[Random.Range(0, obstacles.Length)];
+                        TileInfo tile = m_tiles[currentTile];
+                        tile.AddObstacle(obstacle, m_laneWidth, m_tileHeight, m_tileLength, m_generateOffset);
+
+                        obstacle = null;
+
+                        m_tiles[currentTile] = tile;
+                        //Reset the timer
+                        laneObstacleTimer[lane] = (uint)Random.Range((int)minSpaceBetweenObstacles, (int)maxSpaceBetweenObstacles);
+                    }
+                }
+
+            //Actually generate the lanes boxes and stuff
             for (int lane = 0; lane < m_numberOfLanes; lane++)
                 m_tiles[i * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_tileHeight, m_tileLength, m_generateOffset);
         }
@@ -171,7 +218,7 @@ public class LevelGenerator : MonoBehaviour
     {
         for (int i = 0; i < m_tiles.Count; i++)
             for (int objects = 0; objects < m_tiles[i].m_objectsOnTile.Length; objects++)
-                Destroy(m_tiles[i].m_objectsOnTile[objects]);
+                DestroyImmediate(m_tiles[i].m_objectsOnTile[objects]);
         m_tiles.Clear();
     }
 }
@@ -269,10 +316,33 @@ public struct TileInfo
         //If we have a ramp, create it
         if (m_isRamp)
         {
-            obj = GameObject.Instantiate(tileSlope, new Vector3(laneWidth * m_lane + posOffset.x, (m_height) * tileHeight + posOffset.y, m_forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+            obj = GameObject.Instantiate(tileSlope, new Vector3(laneWidth * m_lane + posOffset.x, m_height * tileHeight + posOffset.y, m_forwardPoint * tileLength + posOffset.z), Quaternion.identity);
             obj.transform.localScale = new Vector3(laneWidth, tileHeight, tileLength);
 
             m_objectsOnTile[1] = obj;
         }
+    }
+    /// <summary>
+    /// Instantiates and stores an obstacle gameObject on this tile
+    /// </summary>
+    /// <param name="obstacle">The obstacle to create and add</param>
+    public void AddObstacle(GameObject obstacle, float laneWidth, float tileHeight, float tileLength, Vector3 posOffset)
+    {
+        int length = m_isRamp ? 2 : 1;
+        length += obstacle != null ? 1 : 0;
+        m_objectsOnTile = new GameObject[length];
+        GameObject obj = GameObject.Instantiate(obstacle, new Vector3(laneWidth * m_lane + posOffset.x, (m_height + 1) * tileHeight + posOffset.y, m_forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+        m_objectsOnTile[length - 1] = obj;
+    }
+    /// <summary>
+    /// Stores an already existing obstacle on this tile
+    /// </summary>
+    /// <param name="obstacle">The obstacle to add</param>
+    public void AddObstacle(ref GameObject obstacle)
+    {
+        int length = m_isRamp ? 2 : 1;
+        length += obstacle != null ? 1 : 0;
+        m_objectsOnTile = new GameObject[length];
+        m_objectsOnTile[length - 1] = obstacle;
     }
 }
