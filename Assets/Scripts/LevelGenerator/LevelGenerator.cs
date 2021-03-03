@@ -72,8 +72,13 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     [Range(0,1)]
     public float m_probabilityForNonRequiredRamps = 0.5f;
-
+    /// <summary>
+    /// An array to store how long until a lane can spawn an obstacle
+    /// </summary>
     private uint[] laneObstacleTimer = new uint[0];
+    /// <summary>
+    /// The current length of the level. Used when extending the level.
+    /// </summary>
     private int m_currentLength = 0;
     /// <summary>
     /// Initalises some variables
@@ -97,7 +102,9 @@ public class LevelGenerator : MonoBehaviour
     {
         GenerateLevel((uint)m_levelLengthDEBUG);
     }
-
+    /// <summary>
+    /// Extends an already existing world otherwise generates a new one if one does not already exist
+    /// </summary>
     [ContextMenu("Extend Level")]
     void ExtendTestLevel()
     {
