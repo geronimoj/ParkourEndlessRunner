@@ -74,22 +74,47 @@ public class LevelGenerator : MonoBehaviour
     public float m_probabilityForNonRequiredRamps = 0.5f;
 
     private uint[] laneObstacleTimer = new uint[0];
+    private int m_currentLength = 0;
+    /// <summary>
+    /// Initalises some variables
+    /// </summary>
+    private void Awake()
+    {
+        m_currentLength = 0;
+    }
     /// <summary>
     /// Generates a level upon starting the game for debugging purposes
     /// </summary>
     private void Start()
     {
-        GenerateLevel();
+        GenerateLevel((uint)m_levelLengthDEBUG);
     }
     /// <summary>
     /// Generates the world
     /// </summary>
-    [ContextMenu("Test Generate Level")]
-    void GenerateLevel()
-    {   //If we already have tiles and are trying to generate more, delete the previous ones. Primarily for debugging
-        if (m_tiles.Count != 0)
-            DeleteLevel();
+    [ContextMenu("Regenerate Level")]
+    void CreateTestLevel()
+    {
+        GenerateLevel((uint)m_levelLengthDEBUG);
+    }
 
+    [ContextMenu("Extend Level")]
+    void ExtendTestLevel()
+    {
+        GenerateLevel((uint)m_levelLengthDEBUG, false);
+    }
+    /// <summary>
+    /// Generates a section of the world
+    /// </summary>
+    /// <param name="layersToGenerate">The number of layers to generate</param>
+    /// <param name="regenerate">Wether or not the level should be completely rengerated or if new layers should be added</param>
+    void GenerateLevel(uint layersToGenerate, bool regenerate = true)
+    {   //If we already have tiles and are trying to generate more, delete the previous ones. Primarily for debugging
+        if (regenerate && m_tiles.Count != 0)
+        {
+            m_currentLength = 0;
+            DeleteLevel();
+        }
         if (laneObstacleTimer.Length != m_numberOfLanes)
             laneObstacleTimer = new uint[m_numberOfLanes];
 
@@ -101,7 +126,7 @@ public class LevelGenerator : MonoBehaviour
         int[] heights = new int[m_numberOfLanes];
         int[] prevHeights = new int[m_numberOfLanes];
 
-        for (int i = 0; i < m_levelLengthDEBUG; i++)
+        for (int i = m_currentLength; i < layersToGenerate + m_currentLength; i++)
         {
             for (int lane = 0; lane < m_numberOfLanes; lane++)
             {
@@ -209,6 +234,8 @@ public class LevelGenerator : MonoBehaviour
             for (int lane = 0; lane < m_numberOfLanes; lane++)
                 m_tiles[i * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_tileHeight, m_tileLength, m_generateOffset);
         }
+
+        m_currentLength += (int)layersToGenerate;
     }
     /// <summary>
     /// Delets the level
