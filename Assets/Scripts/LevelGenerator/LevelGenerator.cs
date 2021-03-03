@@ -125,7 +125,7 @@ public class LevelGenerator : MonoBehaviour
 
                 int min, max;
                 min = prevTileHeight - (int)m_maxHeightChange < 0 ? 0 : prevTileHeight - (int)m_maxHeightChange;
-                max = prevTileHeight + (int)m_maxHeightChange;
+                max = prevTileHeight + (int)m_maxHeightChange >= m_numberOfLayers ? (int)m_numberOfLayers - 1 : prevTileHeight + (int)m_maxHeightChange;
 
                 if (prevTile.IsRamp)
                     canChangeHeight = false;
