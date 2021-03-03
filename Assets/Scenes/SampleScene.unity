@@ -1309,7 +1309,8 @@ MonoBehaviour:
   m_numberOfLanes: 3
   m_numberOfLayers: 3
   m_maxHeightChange: 2
-  m_levelLengthDEBUG: 20
+  m_levelLength: 20
+  m_distanceUntilLoop: 100
   m_tilePrefab: {fileID: 2885713471867661396, guid: ff0178799a7e14244b4a36c1bf7ee377, type: 3}
   m_slopePrefab: {fileID: 7674213680519279055, guid: 9bec8ac7641609f42bee86402b634e6b, type: 3}
   m_generateOffset: {x: -15, y: 1, z: 0}

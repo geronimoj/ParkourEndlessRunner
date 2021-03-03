@@ -33,7 +33,11 @@ public class LevelGenerator : MonoBehaviour
     /// <summary>
     /// The length of the level. Currently used for debugging only
     /// </summary>
-    public int m_levelLengthDEBUG = 20;
+    public int m_levelLength = 20;
+    /// <summary>
+    /// The distance until the game moves everything back towards 0,0,0 to avoid funky lighting
+    /// </summary>
+    public float m_distanceUntilLoop = 100;
     /// <summary>
     /// The prefab to use for general tiles
     /// </summary>
@@ -81,18 +85,32 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private int m_currentLength = 0;
     /// <summary>
+    /// The "position" of the front most tile. This is in grid cords not world cords
+    /// </summary>
+    private int m_frontTilePos = 0;
+    /// <summary>
+    /// Store a reference to the players transform
+    /// </summary>
+    private Transform player;
+    /// <summary>
     /// Initalises some variables
     /// </summary>
     private void Awake()
     {
+        m_frontTilePos = 0;
         m_currentLength = 0;
+        //By dividing it into and casting it to an int, we effectively round the value to be a multiple of tile Length
+        //Basically becoming how many tiles until a loop occurs. We then cast it to an int to chop off decimal points
+        //Before them multiplying it back by tile length to convert it back into a distance
+        m_distanceUntilLoop = (int)(m_distanceUntilLoop / m_tileLength) * m_tileLength;
+        player = GameObject.FindGameObjectWithTag("Player").transform;
     }
     /// <summary>
     /// Generates a level upon starting the game for debugging purposes
     /// </summary>
     private void Start()
     {
-        GenerateLevel((uint)m_levelLengthDEBUG);
+        GenerateLevel((uint)m_levelLength);
     }
     /// <summary>
     /// Generates the world
@@ -100,7 +118,7 @@ public class LevelGenerator : MonoBehaviour
     [ContextMenu("Regenerate Level")]
     void CreateTestLevel()
     {
-        GenerateLevel((uint)m_levelLengthDEBUG);
+        GenerateLevel((uint)m_levelLength);
     }
     /// <summary>
     /// Extends an already existing world otherwise generates a new one if one does not already exist
@@ -108,7 +126,12 @@ public class LevelGenerator : MonoBehaviour
     [ContextMenu("Extend Level")]
     void ExtendTestLevel()
     {
-        GenerateLevel((uint)m_levelLengthDEBUG, false);
+        ExtendLevel(5);
+    }
+
+    void ExtendLevel(uint length)
+    {
+        GenerateLevel(length, false);
     }
     /// <summary>
     /// Generates a section of the world
@@ -119,6 +142,7 @@ public class LevelGenerator : MonoBehaviour
     {   //If we already have tiles and are trying to generate more, delete the previous ones. Primarily for debugging
         if (regenerate && m_tiles.Count != 0)
         {
+            m_frontTilePos = 0;
             m_currentLength = 0;
             DeleteLevel();
         }
@@ -132,9 +156,12 @@ public class LevelGenerator : MonoBehaviour
         bool canChangeHeight;
         int[] heights = new int[m_numberOfLanes];
         int[] prevHeights = new int[m_numberOfLanes];
+        int tileIndex;
 
         for (int i = m_currentLength; i < layersToGenerate + m_currentLength; i++)
         {
+            tileIndex = i - m_frontTilePos;
+
             for (int lane = 0; lane < m_numberOfLanes; lane++)
             {
                 TileInfo tile = new TileInfo();
@@ -144,14 +171,15 @@ public class LevelGenerator : MonoBehaviour
                 float prob = Random.Range(0, (float)1);
                 canChangeHeight = prob < m_probabilityToChangeHeight;
                 int prevTileHeight = 0;
-
-                if (i == 0)
+                Debug.Log("Get previous tile");
+                if (tileIndex == 0)
                     canChangeHeight = true;
                 else
                 {   //Now we have passed the first row, we can propperly initialise the tile
-                    prevTile = m_tiles[((i - 1) * (int)m_numberOfLanes) + lane];
+                    prevTile = m_tiles[((tileIndex - 1) * (int)m_numberOfLanes) + lane];
                     prevTileHeight = (int)prevTile.Height;
                 }
+                Debug.Log("Done");
 
                 prevHeights[lane] = prevTileHeight;
 
@@ -167,7 +195,7 @@ public class LevelGenerator : MonoBehaviour
                 m_tiles.Add(tile);
             }
             //We don't need to solve for the very first tiles since they have no previous tiles
-            if (i != 0)
+            if (tileIndex != 0)
                 //Solve to make sure there are no death walls
                 for (int lane = 0; lane < m_numberOfLanes; lane++)
                 {
@@ -187,7 +215,7 @@ public class LevelGenerator : MonoBehaviour
                     if (lane + 1 < m_numberOfLanes && prevHeights[lane + 1] <= prevHeights[lane] && heights[lane + 1] - prevHeights[lane + 1] <= 0)
                         validLanes++;
 
-                    TileInfo current = m_tiles[i * (int)m_numberOfLanes + lane];
+                    TileInfo current = m_tiles[tileIndex * (int)m_numberOfLanes + lane];
                     //If not, we make this tile a ramp and reduce its height
                     if (validLanes == 0)
                     {
@@ -207,7 +235,7 @@ public class LevelGenerator : MonoBehaviour
                         //will be treated as having equal height so it can be counted as a valid lane
                         heights[lane]--;
                     }
-                    m_tiles[i * (int)m_numberOfLanes + lane] = current;
+                    m_tiles[tileIndex * (int)m_numberOfLanes + lane] = current;
                 }
             //Instantiate any obstacles to slide or vault over
             //Make sure we have obstacles
@@ -215,7 +243,7 @@ public class LevelGenerator : MonoBehaviour
                 //Decrement the timers if they haven't already reached 0
                 for (int lane = 0; lane < m_numberOfLanes; lane++)
                 {
-                    int currentTile = i * (int)m_numberOfLanes + lane;
+                    int currentTile = tileIndex * (int)m_numberOfLanes + lane;
                     if (m_tiles[currentTile].IsRamp)
                         continue;
 
@@ -239,7 +267,7 @@ public class LevelGenerator : MonoBehaviour
 
             //Actually generate the lanes boxes and stuff
             for (int lane = 0; lane < m_numberOfLanes; lane++)
-                m_tiles[i * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_tileHeight, m_tileLength, m_generateOffset);
+                m_tiles[tileIndex * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_tileHeight, m_tileLength, m_generateOffset);
         }
 
         m_currentLength += (int)layersToGenerate;
@@ -254,6 +282,48 @@ public class LevelGenerator : MonoBehaviour
             for (int objects = 0; objects < m_tiles[i].m_objectsOnTile.Length; objects++)
                 DestroyImmediate(m_tiles[i].m_objectsOnTile[objects]);
         m_tiles.Clear();
+    }
+
+    void DeleteFrontTiles(uint tilesToDelete)
+    {
+        for (int i = 0; i < tilesToDelete * m_numberOfLanes; i++)
+        {   //Loop through the first tile and delete it. We don't use i because we then remove this tile from the list, making the next tile the first tile
+            for (int tileObj = 0; tileObj < m_tiles[0].m_objectsOnTile.Length; tileObj++)
+                Destroy(m_tiles[0].m_objectsOnTile[tileObj]);
+            //Remove the front tile
+            m_tiles.RemoveAt(0);
+        }
+    }
+
+    private void Update()
+    {   //Keep generating the world
+        if (player.position.z > (m_frontTilePos + 1) * m_tileLength)
+        {
+            m_frontTilePos++;
+            DeleteFrontTiles(1);
+            ExtendLevel(1);
+        }
+        //If the player gets too far away, teleport everything back
+        //TLDR: Perform a loop
+        if (player.position.z > m_distanceUntilLoop)
+        {   //Teleport the player
+            Vector3 p = player.position;
+            p.z -= m_distanceUntilLoop;
+            player.position = p;
+            //Teleport the world
+            for (int i = 0; i < m_tiles.Count; i++)
+            {
+                for (int tileObj = 0; tileObj < m_tiles[i].m_objectsOnTile.Length; tileObj++)
+                {
+                    p = m_tiles[i].m_objectsOnTile[tileObj].transform.position;
+                    p.z -= m_distanceUntilLoop;
+                    m_tiles[i].m_objectsOnTile[tileObj].transform.position = p;
+                }
+            }
+            //Reset the length values so iterators remain valid and we don't generate 100 units in front of the level. That would be bad
+            m_frontTilePos = 0;
+            m_currentLength = m_tiles.Count / (int)m_numberOfLanes;
+        }
     }
 }
 /// <summary>
