@@ -4,6 +4,7 @@ using UnityEngine;
 /// <summary>
 /// Generates a level
 /// </summary>
+[DefaultExecutionOrder(200)]
 public class LevelGenerator : MonoBehaviour
 {       
     /// <summary>
@@ -34,6 +35,10 @@ public class LevelGenerator : MonoBehaviour
     /// The length of the level. Currently used for debugging only
     /// </summary>
     public int m_levelLength = 20;
+    /// <summary>
+    /// The length of the flat section at the very beginning of each run
+    /// </summary>
+    public int m_initalFlatLength = 7;
     /// <summary>
     /// The distance until the game moves everything back towards 0,0,0 to avoid funky lighting
     /// </summary>
@@ -110,7 +115,8 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        GenerateLevel((uint)m_levelLength);
+        GenerateLevel((uint)m_initalFlatLength, true, true);
+        ExtendLevel((uint)m_levelLength);
     }
     /// <summary>
     /// Generates the world
@@ -138,7 +144,8 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     /// <param name="layersToGenerate">The number of layers to generate</param>
     /// <param name="regenerate">Wether or not the level should be completely rengerated or if new layers should be added</param>
-    void GenerateLevel(uint layersToGenerate, bool regenerate = true)
+    /// <param name="makeFlat">Should the layer be at layer 1 only. Use at the start of a level to avoid instant kills</param>
+    void GenerateLevel(uint layersToGenerate, bool regenerate = true, bool makeFlat = false)
     {   //If we already have tiles and are trying to generate more, delete the previous ones. Primarily for debugging
         if (regenerate && m_tiles.Count != 0)
         {
@@ -155,7 +162,7 @@ public class LevelGenerator : MonoBehaviour
             for (int lane = 0; lane < m_numberOfLanes; lane++)
                 laneObstacleTimer[lane] = (uint)Random.Range((int)minSpaceBetweenObstacles, (int)maxSpaceBetweenObstacles);
         }
-        GameObject obstacle = null;
+        GameObject obstacle;
         bool canChangeHeight;
         int[] heights = new int[m_numberOfLanes];
         int[] prevHeights = new int[m_numberOfLanes];
@@ -192,6 +199,12 @@ public class LevelGenerator : MonoBehaviour
 
                 if (prevTile.IsRamp)
                     canChangeHeight = false;
+
+                if (makeFlat)
+                {
+                    canChangeHeight = false;
+                    prevTileHeight = 1;
+                }
 
                 tile.Initialise((uint)lane, canChangeHeight ? (uint)Random.Range(min, max + 1) : (uint)prevTileHeight, (uint)i, false);
                 heights[lane] = (int)tile.Height;
@@ -242,7 +255,7 @@ public class LevelGenerator : MonoBehaviour
                 }
             //Instantiate any obstacles to slide or vault over
             //Make sure we have obstacles
-            if (obstacles.Length != 0)
+            if (!makeFlat && obstacles.Length != 0)
                 //Decrement the timers if they haven't already reached 0
                 for (int lane = 0; lane < m_numberOfLanes; lane++)
                 {
@@ -296,7 +309,7 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {   //Keep generating the world
         if (player.position.z > (m_frontTilePos + 1) * m_tileLength)
         {
@@ -311,6 +324,9 @@ public class LevelGenerator : MonoBehaviour
             Vector3 p = player.position;
             p.z -= m_distanceUntilLoop;
             player.position = p;
+
+            //player.position -= Vector3.forward * m_distanceUntilLoop;
+            
             //Teleport the world
             for (int i = 0; i < m_tiles.Count; i++)
             {

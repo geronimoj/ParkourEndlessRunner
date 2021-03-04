@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8599937984738530560
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8599937984738530562}
+  - component: {fileID: 8599937984738530563}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: GameManager
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8599937984738530562
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8599937984738530560}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8599937984738530563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8599937984738530560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5959796ba8be51f4b8df2983a485702c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_laneWidth: 3
+  m_tileHeight: 3
+  m_tileLength: 3
+  m_numberOfLanes: 3
+  m_numberOfLayers: 3
+  m_maxHeightChange: 2
+  m_levelLength: 20
+  m_initalFlatLength: 10
+  m_distanceUntilLoop: 100
+  m_tilePrefab: {fileID: 2885713471867661396, guid: ff0178799a7e14244b4a36c1bf7ee377, type: 3}
+  m_slopePrefab: {fileID: 7674213680519279055, guid: 9bec8ac7641609f42bee86402b634e6b, type: 3}
+  m_generateOffset: {x: -15, y: 1, z: 0}
+  m_tiles: []
+  minSpaceBetweenObstacles: 4
+  maxSpaceBetweenObstacles: 6
+  obstacles:
+  - {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
+  - {fileID: 7618985421749997523, guid: b8af832617a7fc74b88acaef352ef81c, type: 3}
+  m_probabilityToChangeHeight: 0.5
+  m_probabilityForNonRequiredRamps: 0.2

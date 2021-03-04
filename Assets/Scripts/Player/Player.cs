@@ -5,6 +5,7 @@ using UnityEngine;
 /// Controls everything player related
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
+//[DefaultExecutionOrder(100)]
 public class Player : MonoBehaviour
 {
     /// <summary>
@@ -47,6 +48,10 @@ public class Player : MonoBehaviour
     public float laneSwapTime = 0.5f;
 
     private float laneSwapTimer = 0;
+
+    bool lShift = false;
+    bool space = false;
+    int swapLane = 0;
     /// <summary>
     /// Gets references to components
     /// </summary>
@@ -71,15 +76,26 @@ public class Player : MonoBehaviour
     /// Moves the player forwards and checks for player input.
     /// If there is input, does the corresponding action
     /// </summary>
-    private void Update()
+    private void FixedUpdate()
     {   //Apply gravity
         if (!m_pc.OnGround)
-            move += Physics.gravity * Time.deltaTime;
+            move += Physics.gravity * Time.fixedDeltaTime;
         else
             move.y = 0;
         ChangeLane(ref move);
         ParkourMove(ref move);
         Move(move);
+    }
+
+    private void Update()
+    {   //Get the inputs
+        lShift = !lShift ? Input.GetKeyDown(KeyCode.LeftShift) : true;
+        space = !space ? Input.GetKeyDown(KeyCode.Space) : true;
+
+        if (swapLane == 0 && Input.GetKeyDown(KeyCode.A))
+            swapLane = -1;
+        if (swapLane == 0 && Input.GetKeyDown(KeyCode.D))
+            swapLane = 1;
     }
     /// <summary>
     /// Moves the player forward
@@ -88,12 +104,15 @@ public class Player : MonoBehaviour
     {   //If we are ragdolled. don't move
         if (m_r.RagdollOn == true)
             return;
+
+        if (moveVec.y != 0)
+            Debug.Log("Falling");
         //Cast the players movement
         bool doRagdoll = false;
 
         //If it hits something, make sure its not a valid surface. Otherwise ragdoll
-        if (ColliderInfo.Cast(m_pc.colInfo, moveVec * Time.deltaTime, out RaycastHit hit))
-            if (!m_pc.collidersToIgnore.Contains(hit.collider) && !hit.transform.CompareTag("Ramp") && hit.normal != Vector3.up)
+        if (ColliderInfo.CastWithOffset(m_pc.colInfo, moveVec * Time.fixedDeltaTime, out RaycastHit hit))
+            if (!m_pc.collidersToIgnore.Contains(hit.collider) && !hit.transform.CompareTag("Ramp") && !InToleraceNorm(hit.normal, Vector3.up, 0.01f))
             {
                 doRagdoll = true;
                 Debug.Log("Killed by: " + hit.transform.gameObject.name);
@@ -103,7 +122,7 @@ public class Player : MonoBehaviour
         if (doRagdoll)
             m_r.RagdollOn = true;
         else
-            m_pc.MoveTo(moveVec * Time.deltaTime);
+            m_pc.MoveTo(moveVec * Time.fixedDeltaTime);
     }
     /// <summary>
     /// Moves the player into the correct lane
@@ -113,19 +132,21 @@ public class Player : MonoBehaviour
         if (laneSwapTimer > laneSwapTime)
         {
             //Check if the player wants to change lanes this frame and that the lane change is a valid lane change
-            if (m_lane != 0 && Input.GetKeyDown(KeyCode.A))
+            if (m_lane != 0 && swapLane < 0)
             {
                 m_lane--;
                 laneSwapTimer = 0;
+                swapLane = 0;
             }
-            else if (m_lane != m_lg.m_numberOfLanes - 1 && Input.GetKeyDown(KeyCode.D))
+            else if (m_lane != m_lg.m_numberOfLanes - 1 && swapLane > 0)
             {
                 m_lane++;
                 laneSwapTimer = 0;
+                swapLane = 0;
             }
         }
         //Increment the timer
-        laneSwapTimer += Time.deltaTime;
+        laneSwapTimer += Time.fixedDeltaTime;
         //We don't need to clamp the value since we ensured it was valid when initially changing it.
         //Lerp the player over to the new lane
         //Calculate the total move vector we need to move along
@@ -133,14 +154,40 @@ public class Player : MonoBehaviour
         //Scale it by the time until we reach the lane swap completion
         moveVec.x *= Mathf.Clamp(laneSwapTimer, 0, laneSwapTime) / laneSwapTime;
         //Divide by time to ensure this is applied as pure velocity
-        moveVec.x /= Time.deltaTime;
+        moveVec.x /= Time.fixedDeltaTime;
     }
     /// <summary>
     /// Checks and performs a parkour move if possible
     /// </summary>
     private void ParkourMove(ref Vector3 moveVec)
-    {   //Jump
-        if (m_pc.OnGround && Input.GetKey(KeyCode.Space))
+    {   //Jump or Vault
+        if (m_pc.OnGround && space)
             moveVec.y = m_jumpVelocity;
+        //Slide or Roll
+        if (lShift)
+        {
+            //Slide
+            //Adjust the players collider
+            m_cc.followHead = true;
+            m_pc.colInfo.UpperHeight = 0;
+            m_a.SetTrigger("Crouch");
+        }
+
+        space = false;
+        lShift = false;
+    }
+
+    public void GetUp()
+    {
+        m_cc.followHead = false;
+        m_pc.colInfo.UpperHeight = 1;
+    }
+
+    private bool InToleraceNorm(Vector3 target, Vector3 expected, float tolerance)
+    {
+        float dot = Vector3.Dot(target.normalized, expected.normalized);
+        if (dot > 1 - tolerance)
+            return true;
+        return false;
     }
 }
