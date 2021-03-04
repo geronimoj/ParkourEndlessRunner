@@ -146,12 +146,15 @@ public class LevelGenerator : MonoBehaviour
             m_currentLength = 0;
             DeleteLevel();
         }
-        if (laneObstacleTimer.Length != m_numberOfLanes)
-            laneObstacleTimer = new uint[m_numberOfLanes];
 
-        for (int lane = 0; lane < m_numberOfLanes; lane++)
-            laneObstacleTimer[lane] = (uint)Random.Range((int)minSpaceBetweenObstacles, (int)maxSpaceBetweenObstacles);
+        if (regenerate)
+        {
+            if (laneObstacleTimer.Length != m_numberOfLanes)
+                laneObstacleTimer = new uint[m_numberOfLanes];
 
+            for (int lane = 0; lane < m_numberOfLanes; lane++)
+                laneObstacleTimer[lane] = (uint)Random.Range((int)minSpaceBetweenObstacles, (int)maxSpaceBetweenObstacles);
+        }
         GameObject obstacle = null;
         bool canChangeHeight;
         int[] heights = new int[m_numberOfLanes];
@@ -171,7 +174,7 @@ public class LevelGenerator : MonoBehaviour
                 float prob = Random.Range(0, (float)1);
                 canChangeHeight = prob < m_probabilityToChangeHeight;
                 int prevTileHeight = 0;
-                Debug.Log("Get previous tile");
+
                 if (tileIndex == 0)
                     canChangeHeight = true;
                 else
@@ -179,7 +182,7 @@ public class LevelGenerator : MonoBehaviour
                     prevTile = m_tiles[((tileIndex - 1) * (int)m_numberOfLanes) + lane];
                     prevTileHeight = (int)prevTile.Height;
                 }
-                Debug.Log("Done");
+
 
                 prevHeights[lane] = prevTileHeight;
 
@@ -190,7 +193,7 @@ public class LevelGenerator : MonoBehaviour
                 if (prevTile.IsRamp)
                     canChangeHeight = false;
 
-                tile.Initialise(ref obstacle, (uint)lane, canChangeHeight ? (uint)Random.Range(min, max + 1) : (uint)prevTileHeight, (uint)i, false);
+                tile.Initialise((uint)lane, canChangeHeight ? (uint)Random.Range(min, max + 1) : (uint)prevTileHeight, (uint)i, false);
                 heights[lane] = (int)tile.Height;
                 m_tiles.Add(tile);
             }
@@ -256,8 +259,6 @@ public class LevelGenerator : MonoBehaviour
                         obstacle = obstacles[Random.Range(0, obstacles.Length)];
                         TileInfo tile = m_tiles[currentTile];
                         tile.AddObstacle(obstacle, m_laneWidth, m_tileHeight, m_tileLength, m_generateOffset);
-
-                        obstacle = null;
 
                         m_tiles[currentTile] = tile;
                         //Reset the timer
@@ -388,12 +389,10 @@ public struct TileInfo
     /// <param name="height">The height of this tile</param>
     /// <param name="forwardPoint">The z step of this tile</param>
     /// <param name="isRamp">If this tile is a ramp</param>
-    public void Initialise(ref GameObject obstacle, uint lane, uint height, uint forwardPoint, bool isRamp)
+    public void Initialise(uint lane, uint height, uint forwardPoint, bool isRamp)
     {
         int length = isRamp ? 2 : 1;
-        length += obstacle != null ? 1 : 0;
         m_objectsOnTile = new GameObject[length];
-        m_objectsOnTile[length - 1] = obstacle;
         m_lane = lane;
         m_height = height;
         m_forwardPoint = forwardPoint;
@@ -435,7 +434,7 @@ public struct TileInfo
         int length = m_isRamp ? 2 : 1;
         length += obstacle != null ? 1 : 0;
         m_objectsOnTile = new GameObject[length];
-        GameObject obj = GameObject.Instantiate(obstacle, new Vector3(laneWidth * m_lane + posOffset.x, (m_height + 1) * tileHeight + posOffset.y, m_forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+        GameObject obj = GameObject.Instantiate(obstacle, new Vector3(laneWidth * m_lane + posOffset.x, (m_height + 0.5f) * tileHeight + posOffset.y, m_forwardPoint * tileLength + posOffset.z), Quaternion.identity);
         m_objectsOnTile[length - 1] = obj;
     }
     /// <summary>

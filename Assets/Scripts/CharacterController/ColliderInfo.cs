@@ -51,6 +51,12 @@ public struct ColliderInfo
     [SerializeField]
     private bool positionOffsetIsGlobal;
     /// <summary>
+    /// Determines if the rotation of the collider is in local or global co-ordinates
+    /// </summary>
+    [Tooltip("Should orienation be in local or global co-ordinates")]
+    [SerializeField]
+    private bool rotationIsGlobal;
+    /// <summary>
     /// The positional offset from the origin of the collider
     /// </summary>
     private Vector3 posOffset;
@@ -85,6 +91,10 @@ public struct ColliderInfo
         {   //If orientation is 0, return -gravity
             if (orientation == Vector3.zero)
                 return -GravityDirection;
+            //If the rotation is global, return the rotation
+            if (rotationIsGlobal)
+                return orientation;
+
             //Return orientation based on origins rotation
             return (origin.forward * orientation.z
                 + origin.right * orientation.x
@@ -322,11 +332,21 @@ public struct ColliderInfo
             onGround = value;
         }
     }
-
+    /// <summary>
+    /// Toggle whether position offset is global
+    /// </summary>
     public bool PositionOffsetIsGlobal
     {
         get { return positionOffsetIsGlobal; }
         set { positionOffsetIsGlobal = value; }
+    }
+    /// <summary>
+    /// Toggle whether orientation is global
+    /// </summary>
+    public bool OrientationIsGlobal
+    {
+        get { return rotationIsGlobal; }
+        set { rotationIsGlobal = value; }
     }
     /// <summary>
     /// Determines if a slope given by a normal can be stood on or is too steep
