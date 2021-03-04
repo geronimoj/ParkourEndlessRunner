@@ -15,4 +15,9 @@ public class EventCatcher : MonoBehaviour
         m_p.GetUp();
         Debug.Log("Get Up");
     }
+
+    void EnterSlide()
+    {
+        m_p.EnterSlide();
+    }
 }

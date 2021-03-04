@@ -169,7 +169,6 @@ public class Player : MonoBehaviour
             //Slide
             //Adjust the players collider
             m_cc.followHead = true;
-            m_pc.colInfo.UpperHeight = 0;
             m_a.SetTrigger("Crouch");
         }
 
@@ -181,6 +180,11 @@ public class Player : MonoBehaviour
     {
         m_cc.followHead = false;
         m_pc.colInfo.UpperHeight = 1;
+    }
+
+    public void EnterSlide()
+    {
+        m_pc.colInfo.UpperHeight = 0;
     }
 
     private bool InToleraceNorm(Vector3 target, Vector3 expected, float tolerance)
