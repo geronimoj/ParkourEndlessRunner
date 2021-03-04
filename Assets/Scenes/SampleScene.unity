@@ -455,10 +455,6 @@ PrefabInstance:
       propertyPath: m_ConnectedAnchor.y
       value: -0.032732956
       objectReference: {fileID: 0}
-    - target: {fileID: 5790210318596564301, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
-      propertyPath: colInfo.slopeAngle
-      value: 50
-      objectReference: {fileID: 0}
     - target: {fileID: 7717145477752577526, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
       propertyPath: m_ConnectedAnchor.x
       value: -0.0000000019645086
@@ -1286,7 +1282,7 @@ GameObject:
   - component: {fileID: 1652082434}
   m_Layer: 0
   m_Name: GameManager
-  m_TagString: Untagged
+  m_TagString: GameManager
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1318,9 +1314,10 @@ MonoBehaviour:
   minSpaceBetweenObstacles: 2
   maxSpaceBetweenObstacles: 4
   obstacles:
-  - {fileID: 6448187661460662866, guid: 3e47ddda6fbd9e64cb92b45a33f8791a, type: 3}
+  - {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
+  - {fileID: 7618985421749997523, guid: b8af832617a7fc74b88acaef352ef81c, type: 3}
   m_probabilityToChangeHeight: 0.5
-  m_probabilityForNonRequiredRamps: 0
+  m_probabilityForNonRequiredRamps: 1
 --- !u!4 &1652082435
 Transform:
   m_ObjectHideFlags: 0
