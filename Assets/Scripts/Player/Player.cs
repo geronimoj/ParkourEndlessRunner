@@ -134,8 +134,8 @@ public class Player : MonoBehaviour
 
     private void Update()
     {   //Get the inputs
-        m_lShift = !m_lShift ? Input.GetKeyDown(KeyCode.LeftShift) : true;
-        m_space = !m_space ? Input.GetKeyDown(KeyCode.Space) : true;
+        m_lShift = m_lShift || Input.GetKeyDown(KeyCode.LeftShift);
+        m_space = !m_space || Input.GetKeyDown(KeyCode.Space);
 
         if (m_swapLane == 0 && Input.GetKeyDown(KeyCode.A))
             m_swapLane = -1;
