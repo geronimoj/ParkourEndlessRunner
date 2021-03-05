@@ -5,7 +5,6 @@ using UnityEngine;
 /// Controls everything player related
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
-//[DefaultExecutionOrder(100)]
 public class Player : MonoBehaviour
 {
     /// <summary>
@@ -92,6 +91,11 @@ public class Player : MonoBehaviour
     /// Did the player press A or D
     /// </summary>
     int m_swapLane = 0;
+
+    public float baseScoreMultiplier = 1;
+
+    [HideInInspector]
+    public float score = 0;
     /// <summary>
     /// Gets references to components
     /// </summary>
@@ -116,7 +120,7 @@ public class Player : MonoBehaviour
     /// If there is input, does the corresponding action
     /// </summary>
     private void FixedUpdate()
-    {   
+    {
         float fallingSpeed = m_move.y;
         //Apply gravity
         if (!m_pc.OnGround && !m_inVault)
@@ -164,9 +168,12 @@ public class Player : MonoBehaviour
         //If the player died, ragdoll them and don't move
         if (doRagdoll)
             m_r.RagdollOn = true;
-        //Otherwise move
+        //Otherwise move and increment the score
         else
+        {
             m_pc.MoveTo(moveVec * Time.fixedDeltaTime);
+            score += baseScoreMultiplier * Time.fixedDeltaTime;
+        }
     }
     /// <summary>
     /// Moves the player into the correct lane
@@ -283,6 +290,7 @@ public class Player : MonoBehaviour
 
     public void ResetPosition()
     {
+        score = 0;
         //Set the starting lane for the player
         m_lane = m_lg.m_numberOfLanes / 2;
 

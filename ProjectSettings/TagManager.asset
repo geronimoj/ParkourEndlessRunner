@@ -7,6 +7,7 @@ TagManager:
   - GameManager
   - Ramp
   - Vaultable
+  - ScoreText
   layers:
   - Default
   - TransparentFX
