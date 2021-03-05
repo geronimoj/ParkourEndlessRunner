@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
         {
             m_lg.CreateLevel();
             m_playerRagdoll.RagdollOn = false;
-            m_p.ResetPosition();
+            m_p.Reset();
         }
     }
 }

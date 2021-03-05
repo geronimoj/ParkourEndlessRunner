@@ -72,10 +72,6 @@ public class Player : MonoBehaviour
     /// </summary>
     bool m_doRoll = false;
     /// <summary>
-    /// Is the player doing a vault
-    /// </summary>
-    bool m_inVault = false;
-    /// <summary>
     /// Is the player is the middle of an animation we don't want to interrupt
     /// </summary>
     bool m_inAnimation = false;
@@ -118,7 +114,7 @@ public class Player : MonoBehaviour
         m_move = Vector3.forward * m_runSpeed;
         m_a.SetFloat("Forwards", 1);
 
-        ResetPosition();
+        Reset();
     }
     /// <summary>
     /// Moves the player forwards and checks for player input.
@@ -128,7 +124,7 @@ public class Player : MonoBehaviour
     {
         float fallingSpeed = m_move.y;
         //Apply gravity
-        if (!m_pc.OnGround && !m_inVault)
+        if (!m_pc.OnGround)
             m_move += Physics.gravity * Time.fixedDeltaTime;
         else
             m_move.y = 0;
@@ -290,7 +286,7 @@ public class Player : MonoBehaviour
         m_pc.collidersToIgnore.RemoveAt(m_pc.collidersToIgnore.Count - 1);
     }
 
-    public void ResetPosition()
+    public void Reset()
     {
         _score = 0;
         //Set the starting lane for the player
