@@ -56,12 +56,12 @@ public class CameraController : MonoBehaviour
             transform.position = trueParent.position + trueParent.up * trueParentOffset.y + trueParent.forward * trueParentOffset.z + trueParent.right * trueParentOffset.x;
 
         Vector3 angles = transform.eulerAngles;
-
+#if FREECAM
         if (Cursor.lockState == CursorLockMode.Locked)
-        {
+        {   //Get the mouses movement
             float dx = -Input.GetAxis("Mouse Y");
             float dy = Input.GetAxis("Mouse X");
-
+            //Calculate the change in Y
             dx = angles.x + dx * speed * Time.deltaTime;
 
             //Clamp the angle within 70 degrees
@@ -79,7 +79,7 @@ public class CameraController : MonoBehaviour
 
             angles.y = parentAngle.y;
         }
-
+#endif
         if (!followHead)
             angles.z = 0;
 

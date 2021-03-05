@@ -44,8 +44,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_laneWidth: 3
-  m_tileHeight: 3
-  m_tileLength: 3
+  m_tileHeight: 4
+  m_tileLength: 5
   m_numberOfLanes: 3
   m_numberOfLayers: 3
   m_maxHeightChange: 2

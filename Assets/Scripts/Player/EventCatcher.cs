@@ -20,4 +20,14 @@ public class EventCatcher : MonoBehaviour
     {
         m_p.EnterSlide();
     }
+
+    void ReleaseCamera()
+    {
+        m_p.ReleaseCamera();
+    }
+
+    public void ExitVault()
+    {
+        m_p.ExitVault();
+    }
 }

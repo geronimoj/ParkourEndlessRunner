@@ -115,16 +115,16 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        GenerateLevel((uint)m_initalFlatLength, true, true);
-        ExtendLevel((uint)m_levelLength);
+        CreateLevel();
     }
     /// <summary>
     /// Generates the world
     /// </summary>
     [ContextMenu("Regenerate Level")]
-    void CreateTestLevel()
+    public void CreateLevel()
     {
-        GenerateLevel((uint)m_levelLength);
+        GenerateLevel((uint)m_initalFlatLength, true, true);
+        ExtendLevel((uint)m_levelLength);
     }
     /// <summary>
     /// Extends an already existing world otherwise generates a new one if one does not already exist
@@ -135,7 +135,7 @@ public class LevelGenerator : MonoBehaviour
         ExtendLevel(5);
     }
 
-    void ExtendLevel(uint length)
+    public void ExtendLevel(uint length)
     {
         GenerateLevel(length, false);
     }
@@ -266,7 +266,7 @@ public class LevelGenerator : MonoBehaviour
                     if (laneObstacleTimer[lane] != 0)
                         laneObstacleTimer[lane]--;
                     //If they have reached 0, check if we can spawn an obstacle on that tile
-                    else
+                    else if (!m_tiles[currentTile - (int)m_numberOfLanes].IsRamp)
                     {
                         //Select a random obstacle to spawn
                         obstacle = obstacles[Random.Range(0, obstacles.Length)];
