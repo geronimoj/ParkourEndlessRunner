@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         m_lg = GetComponent<LevelGenerator>();
-        m_p = Player.player;
+        m_p = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         m_playerRagdoll = m_p.GetComponentInChildren<Ragdoll>();
         m_score = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<Text>();
     }

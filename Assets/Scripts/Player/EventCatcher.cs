@@ -7,7 +7,7 @@ public class EventCatcher : MonoBehaviour
     private Player m_p;
     private void Awake()
     {
-        m_p = Player.player;
+        m_p = GetComponentInParent<Player>();
     }
 
     void GetUp()
