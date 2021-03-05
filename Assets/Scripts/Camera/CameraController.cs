@@ -40,6 +40,8 @@ public class CameraController : MonoBehaviour
     private Vector3 headAngle = new Vector3();
 
     public bool followHead = false;
+
+    public bool m_ignoreYAxisOnHeadFollow = false;
     /// <summary>
     /// Disables the players mouse cursor
     /// </summary>
@@ -101,7 +103,10 @@ public class CameraController : MonoBehaviour
         }
         else
         {
-            transform.eulerAngles = trueParent.eulerAngles;
+            Vector3 angle = trueParent.eulerAngles;
+            if (m_ignoreYAxisOnHeadFollow)
+                angle.y = 0;
+            transform.eulerAngles = angle;
         }
     }
 }

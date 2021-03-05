@@ -150,7 +150,11 @@ public class Player : MonoBehaviour
 
         //If it hits something, make sure its not a valid surface. Otherwise ragdoll
         if (ColliderInfo.CastWithOffset(m_pc.colInfo, moveVec * Time.fixedDeltaTime, out RaycastHit hit)
-            && !m_pc.collidersToIgnore.Contains(hit.collider) && !hit.transform.CompareTag("Ramp") && !InToleraceNorm(hit.normal, Vector3.up, 0.01f)
+            && !m_pc.collidersToIgnore.Contains(hit.collider) 
+            //If its a ramp, we don't need to check the tolerance as the direction won't be up.
+            //If it IS a ramp, we need to check that we aren't colliding with its left or right sides
+            && (!hit.transform.CompareTag("Ramp") || (InToleraceNorm(hit.normal, Vector3.right, 0.01f) || InToleraceNorm(hit.normal, -Vector3.right, 0.01f))) 
+            && !InToleraceNorm(hit.normal, Vector3.up, 0.01f)
             //If the player does not roll
             || m_pc.OnGround && Mathf.Abs(fallingSpeed) > Mathf.Abs(m_fallKillSpeed) && m_rollTimer > m_rollReactionTime)
         {
@@ -229,6 +233,7 @@ public class Player : MonoBehaviour
             {
                 //Adjust the players collider
                 m_cc.followHead = true;
+                m_cc.m_ignoreYAxisOnHeadFollow = true;
                 m_a.SetTrigger("Crouch");
                 m_inAnimation = true;
             }
@@ -266,6 +271,7 @@ public class Player : MonoBehaviour
     public void ReleaseCamera()
     {
         m_cc.followHead = false;
+        m_cc.m_ignoreYAxisOnHeadFollow = false;
     }
 
     public void ExitVault()

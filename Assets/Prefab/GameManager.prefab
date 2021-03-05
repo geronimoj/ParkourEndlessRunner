@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8599937984738530562}
   - component: {fileID: 8599937984738530563}
+  - component: {fileID: 5562916684381745588}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: GameManager
@@ -46,7 +47,7 @@ MonoBehaviour:
   m_laneWidth: 3
   m_tileHeight: 4
   m_tileLength: 5
-  m_numberOfLanes: 3
+  m_numberOfLanes: 5
   m_numberOfLayers: 3
   m_maxHeightChange: 2
   m_levelLength: 20
@@ -63,3 +64,15 @@ MonoBehaviour:
   - {fileID: 7618985421749997523, guid: b8af832617a7fc74b88acaef352ef81c, type: 3}
   m_probabilityToChangeHeight: 0.5
   m_probabilityForNonRequiredRamps: 0.2
+--- !u!114 &5562916684381745588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8599937984738530560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43c7aa24ac570214ba3f2ac1cd107821, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
