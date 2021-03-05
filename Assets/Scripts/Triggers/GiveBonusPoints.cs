@@ -24,6 +24,6 @@ public class GiveBonusPoints : MonoBehaviour
         if (!other.CompareTag("Player"))
             return;
 
-        other.GetComponentInParent<Player>().Score += bonusPoints;
+        Player.player.Score += bonusPoints;
     }
 }

@@ -8,6 +8,10 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     /// <summary>
+    /// Store a static reference to this game to make it easier to read and write to the player
+    /// </summary>
+    public static Player player = null;
+    /// <summary>
     /// The speed at which the player runs
     /// </summary>
     public float m_runSpeed = 0;
@@ -111,6 +115,8 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
+        player = this;
+
         m_move = Vector3.forward * m_runSpeed;
         m_a.SetFloat("Forwards", 1);
 
