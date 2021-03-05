@@ -23,8 +23,8 @@ public class GameManager : MonoBehaviour
     }
 
     void Update()
-    {
-        m_score.text = "Score: " + (int)m_p.score;
+    {   //Cast score to an int to cut off any decimal places. We don't want them in the score
+        m_score.text = "Score: " + (int)m_p.Score;
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             m_lg.CreateLevel();

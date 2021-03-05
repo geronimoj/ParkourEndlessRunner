@@ -94,8 +94,13 @@ public class Player : MonoBehaviour
 
     public float baseScoreMultiplier = 1;
 
-    [HideInInspector]
-    public float score = 0;
+    private float _score = 0;
+
+    public float Score
+    {
+        get { return _score; }
+        set { _score = value; }
+    }
     /// <summary>
     /// Gets references to components
     /// </summary>
@@ -135,7 +140,7 @@ public class Player : MonoBehaviour
     private void Update()
     {   //Get the inputs
         m_lShift = m_lShift || Input.GetKeyDown(KeyCode.LeftShift);
-        m_space = !m_space || Input.GetKeyDown(KeyCode.Space);
+        m_space = m_space || Input.GetKeyDown(KeyCode.Space);
 
         if (m_swapLane == 0 && Input.GetKeyDown(KeyCode.A))
             m_swapLane = -1;
@@ -172,7 +177,7 @@ public class Player : MonoBehaviour
         else
         {
             m_pc.MoveTo(moveVec * Time.fixedDeltaTime);
-            score += baseScoreMultiplier * Time.fixedDeltaTime;
+            _score += baseScoreMultiplier * Time.fixedDeltaTime;
         }
     }
     /// <summary>
@@ -220,18 +225,16 @@ public class Player : MonoBehaviour
             if (Physics.Raycast(m_pc.colInfo.GetLowerPoint(), Vector3.forward, out RaycastHit hit, m_pc.colInfo.TrueRadius + m_vaultRange)
                 && hit.transform.CompareTag("Vaultable"))
             {
+                m_pc.collidersToIgnore.Add(hit.collider);
                 m_a.SetTrigger("Vault");
                 m_inAnimation = true;
                 m_cc.followHead = true;
-                m_pc.colInfo.LowerHeight = 0;
-                m_inVault = true;
             }
             else
                 //Otherwise, do a jump
                 moveVec.y = m_jumpVelocity;
         }
 
-        Debug.DrawLine(m_pc.colInfo.GetLowerPoint(), m_pc.colInfo.GetLowerPoint() + Vector3.forward * (m_pc.colInfo.TrueRadius + m_vaultRange), Color.blue);
         //Slide or Roll
         if (!m_inAnimation && m_lShift)
         {
@@ -283,14 +286,13 @@ public class Player : MonoBehaviour
 
     public void ExitVault()
     {
-        m_pc.colInfo.LowerHeight = 1;
-        m_inVault = false;
         m_inAnimation = false;
+        m_pc.collidersToIgnore.RemoveAt(m_pc.collidersToIgnore.Count - 1);
     }
 
     public void ResetPosition()
     {
-        score = 0;
+        _score = 0;
         //Set the starting lane for the player
         m_lane = m_lg.m_numberOfLanes / 2;
 

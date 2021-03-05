@@ -86,8 +86,7 @@ MonoBehaviour:
   m_rollReactionTime: 0.3
   m_fallKillSpeed: 7
   m_vaultRange: 4
-  baseScoreMultiplier: 10
-  score: 0
+  baseScoreMultiplier: 100
 --- !u!1 &15723219316764882
 GameObject:
   m_ObjectHideFlags: 0
