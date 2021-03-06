@@ -13,7 +13,6 @@ public class EventCatcher : MonoBehaviour
     void GetUp()
     {
         m_p.GetUp();
-        Debug.Log("Get Up");
     }
 
     void EnterSlide()
@@ -29,5 +28,10 @@ public class EventCatcher : MonoBehaviour
     public void ExitVault()
     {
         m_p.ExitVault();
+    }
+
+    public void EnterAnim()
+    {
+        m_p.EnterAnim();
     }
 }

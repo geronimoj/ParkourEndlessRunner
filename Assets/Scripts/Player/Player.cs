@@ -229,8 +229,6 @@ public class Player : MonoBehaviour
             {
                 m_pc.collidersToIgnore.Add(hit.collider);
                 m_a.SetTrigger("Vault");
-                m_inAnimation = true;
-                m_cc.followHead = true;
             }
             else
                 //Otherwise, do a jump
@@ -244,10 +242,8 @@ public class Player : MonoBehaviour
             if (m_pc.OnGround)
             {
                 //Adjust the players collider
-                m_cc.followHead = true;
                 m_cc.m_ignoreYAxisOnHeadFollow = true;
                 m_a.SetTrigger("Crouch");
-                m_inAnimation = true;
             }
             else
             {
@@ -259,10 +255,11 @@ public class Player : MonoBehaviour
         if (m_doRoll && m_pc.OnGround && m_rollTimer <= m_rollReactionTime)
         {
             m_doRoll = false;
-            m_cc.followHead = true;
             m_a.SetTrigger("Roll");
-            m_inAnimation = true;
         }
+        //If we run out of time for a roll, set us to not be doing a roll any more
+        else if (m_rollTimer > m_rollReactionTime)
+            m_doRoll = false;
 
         m_rollTimer += Time.deltaTime;
         m_space = false;
@@ -292,8 +289,15 @@ public class Player : MonoBehaviour
         m_pc.collidersToIgnore.RemoveAt(m_pc.collidersToIgnore.Count - 1);
     }
 
+    public void EnterAnim()
+    {
+        m_cc.followHead = true;
+        m_inAnimation = true;
+    }
+
     public void Reset()
     {
+        m_move = Vector3.forward * m_runSpeed;
         _score = 0;
         //Set the starting lane for the player
         m_lane = m_lg.m_numberOfLanes / 2;
