@@ -278,22 +278,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 15723219316764887, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 15723219316764887, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 15723219316764887, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 15723219316764887, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 15723219316764887, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
@@ -344,10 +328,6 @@ PrefabInstance:
     - target: {fileID: 5330725322951997814, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
       propertyPath: rollReactionTime
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5330725322951997814, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
-      propertyPath: baseScoreMultiplier
-      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 5469930165192082104, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
       propertyPath: m_ConnectedAnchor.z
@@ -828,5 +808,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8599937984738530563, guid: 7963520399eb0dd4281730ae35ff0056, type: 3}
+      propertyPath: obstacles.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8599937984738530563, guid: 7963520399eb0dd4281730ae35ff0056, type: 3}
+      propertyPath: m_initalFlatLength
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8599937984738530563, guid: 7963520399eb0dd4281730ae35ff0056, type: 3}
+      propertyPath: obstacles.Array.data[2]
+      value: 
+      objectReference: {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
+    - target: {fileID: 8599937984738530563, guid: 7963520399eb0dd4281730ae35ff0056, type: 3}
+      propertyPath: obstacles.Array.data[3]
+      value: 
+      objectReference: {fileID: 6721257737778821531, guid: 24d9946828acd3a419693e00cc23c5c1, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7963520399eb0dd4281730ae35ff0056, type: 3}
