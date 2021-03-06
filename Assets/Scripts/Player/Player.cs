@@ -7,6 +7,63 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerController))]
 public class Player : MonoBehaviour
 {
+    #region Input KeyCodes
+    private KeyCode _slideKey = KeyCode.LeftShift;
+    
+    public KeyCode SlideKey
+    {
+        get => _slideKey;
+        set
+        {
+            if (!InvalidKeyCode(value))
+                _slideKey = value;
+        }
+    }
+
+    private KeyCode _jumpKey = KeyCode.Space;
+
+    public KeyCode JumpKey
+    {
+        get => _jumpKey;
+        set
+        {
+            if (!InvalidKeyCode(value))
+                _jumpKey = value;
+        }
+    }
+
+    private KeyCode _dodgeLeftKey = KeyCode.A;
+
+    public KeyCode DodgeLeftKey
+    {
+        get => _dodgeLeftKey; 
+        set
+        {
+            if (!InvalidKeyCode(value))
+                _dodgeLeftKey = value;
+        }
+    }
+
+    private KeyCode _dodgeRightKey = KeyCode.D;
+
+    public KeyCode DodgeRightKey
+    {
+        get => _dodgeRightKey;
+        set
+        {
+            if (!InvalidKeyCode(value))
+                _dodgeRightKey = value;
+        }
+    }
+
+    private bool InvalidKeyCode(KeyCode key)
+    {
+        if (key == KeyCode.Escape || key == KeyCode.Return)
+            return true;
+        return false;
+    }
+    #endregion
+
     /// <summary>
     /// Store a static reference to this game to make it easier to read and write to the player
     /// </summary>
@@ -79,6 +136,8 @@ public class Player : MonoBehaviour
     /// Is the player is the middle of an animation we don't want to interrupt
     /// </summary>
     bool m_inAnimation = false;
+
+    #region Input Storage
     /// <summary>
     /// Did the player press left shift 
     /// </summary>
@@ -91,6 +150,7 @@ public class Player : MonoBehaviour
     /// Did the player press A or D
     /// </summary>
     int m_swapLane = 0;
+    #endregion
 
     public float baseScoreMultiplier = 1;
 
@@ -101,6 +161,8 @@ public class Player : MonoBehaviour
         get { return _score; }
         set { _score = value; }
     }
+
+    public bool IsDead => m_r.RagdollOn;
     /// <summary>
     /// Gets references to components
     /// </summary>
@@ -116,7 +178,6 @@ public class Player : MonoBehaviour
     private void Start()
     {
         player = this;
-
         m_move = Vector3.forward * m_runSpeed;
         m_a.SetFloat("Forwards", 1);
 
@@ -141,12 +202,12 @@ public class Player : MonoBehaviour
 
     private void Update()
     {   //Get the inputs
-        m_lShift = m_lShift || Input.GetKeyDown(KeyCode.LeftShift);
-        m_space = m_space || Input.GetKeyDown(KeyCode.Space);
+        m_lShift = m_lShift || Input.GetKeyDown(SlideKey);
+        m_space = m_space || Input.GetKeyDown(JumpKey);
 
-        if (m_swapLane == 0 && Input.GetKeyDown(KeyCode.A))
+        if (m_swapLane == 0 && Input.GetKeyDown(DodgeLeftKey))
             m_swapLane = -1;
-        if (m_swapLane == 0 && Input.GetKeyDown(KeyCode.D))
+        if (m_swapLane == 0 && Input.GetKeyDown(DodgeRightKey))
             m_swapLane = 1;
     }
     /// <summary>
@@ -297,6 +358,10 @@ public class Player : MonoBehaviour
 
     public void Reset()
     {
+        m_r.RagdollOn = false;
+        m_a.Play("Base Layer.Blend Tree", 0);
+        m_cc.ResetRotation();
+
         m_move = Vector3.forward * m_runSpeed;
         _score = 0;
         //Set the starting lane for the player
@@ -312,6 +377,8 @@ public class Player : MonoBehaviour
         m_doRoll = false;
         m_space = false;
         m_lShift = false;
+        m_inAnimation = false;
+        m_cc.followHead = false;
         m_swapLane = 0;
     }
 

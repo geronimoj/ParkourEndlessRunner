@@ -35,7 +35,7 @@ public class Ragdoll : MonoBehaviour
     /// <summary>
     /// Initialises the class and finds the rigidbodies
     /// </summary>
-    private void Start()
+    private void Awake()
     {
         animator = GetComponent<Animator>();
 

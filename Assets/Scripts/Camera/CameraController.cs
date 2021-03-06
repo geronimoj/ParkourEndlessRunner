@@ -97,9 +97,9 @@ public class CameraController : MonoBehaviour
     {
         if (!followHead)
         {
-            Vector3 testAng = neckTransform.eulerAngles;
-            testAng.x += headAngle.x;
-            neckTransform.eulerAngles = testAng;
+            Vector3 ang = neckTransform.eulerAngles;
+            ang.x += headAngle.x;
+            neckTransform.eulerAngles = ang;
         }
         else
         {
@@ -108,5 +108,10 @@ public class CameraController : MonoBehaviour
                 angle.y = 0;
             transform.eulerAngles = angle;
         }
+    }
+
+    public void ResetRotation()
+    {
+        transform.eulerAngles = Vector3.zero;
     }
 }
