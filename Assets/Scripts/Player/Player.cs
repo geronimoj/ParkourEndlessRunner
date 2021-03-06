@@ -308,6 +308,11 @@ public class Player : MonoBehaviour
         pos.z = m_lg.m_generateOffset.z;
         pos.x = m_lg.m_laneWidth * m_lane + m_lg.m_generateOffset.x;
         transform.position = pos;
+
+        m_doRoll = false;
+        m_space = false;
+        m_lShift = false;
+        m_swapLane = 0;
     }
 
     private bool InToleraceNorm(Vector3 target, Vector3 expected, float tolerance)

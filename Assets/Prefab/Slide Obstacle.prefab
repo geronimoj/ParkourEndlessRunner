@@ -48,7 +48,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4072030645230854988}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -213,6 +213,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: VentLegs
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c6d1ef471640512409bb70b1cdfd6cc7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c6d1ef471640512409bb70b1cdfd6cc7, type: 3}
 --- !u!4 &928721603802998350 stripped
@@ -275,6 +279,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: VentLegs (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c6d1ef471640512409bb70b1cdfd6cc7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c6d1ef471640512409bb70b1cdfd6cc7, type: 3}
 --- !u!4 &1737758719343661865 stripped
@@ -292,6 +300,10 @@ PrefabInstance:
     - target: {fileID: 6853754247433847067, guid: 0318480d38c8a3f45a568f7ab0c31210, type: 3}
       propertyPath: m_Name
       value: AirVent (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6853754247433847067, guid: 0318480d38c8a3f45a568f7ab0c31210, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7342123410900356002, guid: 0318480d38c8a3f45a568f7ab0c31210, type: 3}
       propertyPath: m_LocalPosition.x
@@ -362,6 +374,10 @@ PrefabInstance:
     - target: {fileID: 6853754247433847067, guid: 0318480d38c8a3f45a568f7ab0c31210, type: 3}
       propertyPath: m_Name
       value: AirVent
+      objectReference: {fileID: 0}
+    - target: {fileID: 6853754247433847067, guid: 0318480d38c8a3f45a568f7ab0c31210, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7342123410900356002, guid: 0318480d38c8a3f45a568f7ab0c31210, type: 3}
       propertyPath: m_LocalPosition.x

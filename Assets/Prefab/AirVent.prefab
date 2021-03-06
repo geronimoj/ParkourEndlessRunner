@@ -87,9 +87,21 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 102.14308
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: ea5e28ddeee0b7a44b7954b99a458064, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: ea5e28ddeee0b7a44b7954b99a458064, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ea5e28ddeee0b7a44b7954b99a458064, type: 3}
       propertyPath: m_Name
       value: Air Vent
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ea5e28ddeee0b7a44b7954b99a458064, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ea5e28ddeee0b7a44b7954b99a458064, type: 3}
@@ -149,9 +161,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 9a834a751086b1c4789d33c06fe840ba, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 9a834a751086b1c4789d33c06fe840ba, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9a834a751086b1c4789d33c06fe840ba, type: 3}
       propertyPath: m_Name
       value: Air Vent Exit
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 9a834a751086b1c4789d33c06fe840ba, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9a834a751086b1c4789d33c06fe840ba, type: 3}
