@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 /// <summary>
 /// Gives the player bonus points upon passing through the trigger
 /// </summary>
@@ -8,22 +6,31 @@ using UnityEngine;
 public class GiveBonusPoints : MonoBehaviour
 {
     /// <summary>
-    /// The bonus points to give the player upon entering
+    /// The bonus points to give to the players score upon entering the trigger
     /// </summary>
-    public float bonusPoints = 100;
+    [Tooltip("The points gained from performing a parkour move on an obstacle.")]
+    [SerializeField]
+    private float _bonusPoints = 100;
     /// <summary>
-    /// Sets the collider to be a trigger
+    /// The bonus points to give to the players score upon entering the trigger
+    /// </summary>
+    public float BonusPoints => _bonusPoints;
+    /// <summary>
+    /// Sets the collider to be a trigger just in case its not done by a developer
     /// </summary>
     void Start()
     {
         GetComponent<Collider>().isTrigger = true;
     }
-
+    /// <summary>
+    /// Adds bonusPoints to the players score if the player enters the trigger
+    /// </summary>
+    /// <param name="other">The collider of the object that entered the trigger</param>
     private void OnTriggerEnter(Collider other)
-    {
+    {   //If its not a player, return
         if (!other.CompareTag("Player"))
             return;
-
-        Player.player.Score += bonusPoints;
+        //Increment the players store
+        Player.player.Score += BonusPoints;
     }
 }

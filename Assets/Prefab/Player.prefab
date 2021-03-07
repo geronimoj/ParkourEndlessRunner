@@ -80,13 +80,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08d37e420eda50a499bfc5a085bf9600, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_runSpeed: 10
-  m_jumpVelocity: 5
-  m_laneSwapTime: 0.25
-  m_rollReactionTime: 0.3
-  m_fallKillSpeed: 7
-  m_vaultRange: 4
-  baseScoreMultiplier: 100
+  _runSpeed: 10
+  _jumpVelocity: 5
+  _laneSwapTime: 0.2
+  _rollReactionTime: 0.3
+  _fallKillVelocity: 7
+  _vaultRange: 4
+  _baseScoreMultiplier: 100
 --- !u!1 &15723219316764882
 GameObject:
   m_ObjectHideFlags: 0
@@ -183,11 +183,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1efc40cf96fa534fbfa9334e35ce87a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2000
-  parentTrans: {fileID: 15723218886475979}
-  trueParent: {fileID: 2589901306340597348}
-  neckTransform: {fileID: 1128308840135156376}
-  trueParentOffset: {x: 0, y: 0.1, z: 0}
+  _trueParent: {fileID: 2589901306340597348}
+  _neckTransform: {fileID: 1128308840135156376}
+  _trueParentOffset: {x: 0, y: 0.1, z: 0}
   maxAngle: 90
   followHead: 0
   m_ignoreYAxisOnHeadFollow: 0

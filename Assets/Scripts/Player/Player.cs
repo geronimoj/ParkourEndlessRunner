@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 /// <summary>
 /// Controls everything player related
 /// </summary>
@@ -8,8 +6,14 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     #region Input KeyCodes
+    /// <summary>
+    /// The Input Key used for sliding and rolling
+    /// </summary>
     private KeyCode _slideKey = KeyCode.LeftShift;
-    
+    /// <summary>
+    /// The Input Key used for sliding and rolling.
+    /// Cannot be Escape or Return
+    /// </summary>
     public KeyCode SlideKey
     {
         get => _slideKey;
@@ -19,9 +23,14 @@ public class Player : MonoBehaviour
                 _slideKey = value;
         }
     }
-
+    /// <summary>
+    /// The Input Key used for jumping and vaulting
+    /// </summary>
     private KeyCode _jumpKey = KeyCode.Space;
-
+    /// <summary>
+    /// The Input Key used for jumping and vaulting
+    /// Cannot be Escape or Return
+    /// </summary>
     public KeyCode JumpKey
     {
         get => _jumpKey;
@@ -31,9 +40,14 @@ public class Player : MonoBehaviour
                 _jumpKey = value;
         }
     }
-
+    /// <summary>
+    /// The Input Key used for doding left
+    /// </summary>
     private KeyCode _dodgeLeftKey = KeyCode.A;
-
+    /// <summary>
+    /// The Input Key used for dodging left
+    /// Cannot be Escape or Return
+    /// </summary>
     public KeyCode DodgeLeftKey
     {
         get => _dodgeLeftKey; 
@@ -43,9 +57,14 @@ public class Player : MonoBehaviour
                 _dodgeLeftKey = value;
         }
     }
-
+    /// <summary>
+    /// The Input Key used for doding right
+    /// </summary>
     private KeyCode _dodgeRightKey = KeyCode.D;
-
+    /// <summary>
+    /// The Input Key used for doding right
+    /// Cannot be Escape or Return
+    /// </summary>
     public KeyCode DodgeRightKey
     {
         get => _dodgeRightKey;
@@ -55,7 +74,12 @@ public class Player : MonoBehaviour
                 _dodgeRightKey = value;
         }
     }
-
+    /// <summary>
+    /// Determines if a given key can be used as an input for an action for the player.
+    /// Invalid Keys: Escape, Return
+    /// </summary>
+    /// <param name="key">The key to check</param>
+    /// <returns>Returns true if key is Escape or Return</returns>
     private bool InvalidKeyCode(KeyCode key)
     {
         if (key == KeyCode.Escape || key == KeyCode.Return)
@@ -69,117 +93,173 @@ public class Player : MonoBehaviour
     /// </summary>
     public static Player player = null;
     /// <summary>
-    /// The speed at which the player runs
+    /// The speed at which the player runs in global units per second
     /// </summary>
-    public float m_runSpeed = 0;
+    [Tooltip("Determines the speed at which the player runs in global units per second")]
+    [SerializeField]
+    private float _runSpeed = 0;
     /// <summary>
-    /// The velocity the player gains upon jumping
+    /// The speed at which the player runs in global units per second
     /// </summary>
-    public float m_jumpVelocity = 10;
+    public float RunSpeed => _runSpeed;
+    /// <summary>
+    /// The vertical velocity the player gains upon jumping in global units per second
+    /// </summary>
+    [Tooltip("The vertical velocity the player gains upon jumping in global units per second")]
+    [SerializeField]
+    private float _jumpVelocity = 10;
+    /// <summary>
+    /// The vertical velocity the player gains upon jumping in global units per second
+    /// </summary>
+    public float JumpVelocity => _jumpVelocity;
     /// <summary>
     /// The current lane of the player, for position calculations
     /// </summary>
-    private uint m_lane = 1;
+    private uint _lane = 1;
     /// <summary>
-    /// Reference to a player controller used for moving thisn player
+    /// The current lane the player is in. Used for position calculations
     /// </summary>
-    private PlayerController m_pc = null;
+    public uint CurrentLane => _lane;
+
+    #region Behvaiour References
+    /// <summary>
+    /// Reference to a player controller used for moving this player
+    /// </summary>
+    private PlayerController _pc = null;
     /// <summary>
     /// Reference to this players animator
     /// </summary>
-    private Animator m_a = null;
+    private Animator _a = null;
     /// <summary>
     /// Reference to this players ragdoller
     /// </summary>
-    private Ragdoll m_r = null;
+    private Ragdoll _r = null;
     /// <summary>
     /// Reference to this player camera controller
     /// </summary>
-    private CameraController m_cc = null;
+    private CameraController _cc = null;
     /// <summary>
     /// A reference to the level generator to get and get only, a few variables
     /// </summary>
-    private LevelGenerator m_lg = null;
+    private LevelGenerator _lg = null;
+    #endregion
     /// <summary>
-    /// Stores the players movement vector
+    /// Stores the players movement vector for smooth movement
     /// </summary>
-    private Vector3 m_move;
+    private Vector3 _move;
     /// <summary>
-    /// How long it takes to swap lanes
+    /// The duration of a laneswap. Also determines the speed at which the lane swap takes place
     /// </summary>
-    public float m_laneSwapTime = 0.5f;
+    [Tooltip("The duration of a laneswap. Also determines the speed at which the lane swap takes place")]
+    [SerializeField]
+    private float _laneSwapTime = 0.5f;
     /// <summary>
-    /// The timer for how long it takes to swap lanes
+    /// The duration of a laneswap. Also determines the speed at which the lane swap takes place
     /// </summary>
-    private float m_laneSwapTimer = 0;
+    public float LaneSwapTime => _laneSwapTime;
     /// <summary>
-    /// The time in which before landing, if the shift key is pressed, a roll occurs
+    /// The timer used for tracking how far through a lane swap the player is
     /// </summary>
-    public float m_rollReactionTime = 0.3f;
+    private float t_laneSwapTimer = 0;
     /// <summary>
-    /// The speed at which, if the player lands with a vertical velocity greater than this value without rolling, will die
+    /// The time period before landing the shift key must be pressed for a roll to occur
     /// </summary>
-    public float m_fallKillSpeed = 1;
+    [Tooltip("The time period before landing the Slide key must be pressed for a roll to occur")]
+    [SerializeField]
+    private float _rollReactionTime = 0.3f;
     /// <summary>
-    /// The timer to store if you have successfully rolled
+    /// The time period before landing the shift key must be pressed for a roll to occur
     /// </summary>
-    private float m_rollTimer = 0;
+    public float RollReactionTime => _rollReactionTime;
     /// <summary>
-    /// How far away from a vaultable object you can begin the vault. This value extends from the edge of the players collider.
+    /// The timer to store if the player will roll upon landing
     /// </summary>
-    public float m_vaultRange = 0.5f;
+    private float t_rollTimer = 0;
     /// <summary>
-    /// Is the player attempting to roll
+    /// The minimum vertical speed of the player required to kill the player from falling given the player does not roll
     /// </summary>
-    bool m_doRoll = false;
+    [Tooltip("The minimum vertical speed of the player required to kill the player from falling given the player does not roll")]
+    [SerializeField]
+    private float _fallKillVelocity = 1;
     /// <summary>
-    /// Is the player is the middle of an animation we don't want to interrupt
+    /// The minimum vertical speed of the player required to kill the player from falling given the player does not roll
     /// </summary>
-    bool m_inAnimation = false;
+    public float FallKillVelocity => _fallKillVelocity;
+    /// <summary>
+    /// The maximum distance at which a vault can occur from a vaultable object. The distance accounts for the players collider radius
+    /// </summary>
+    [Tooltip("The maximum distance at which a vault can occur from a vaultable object. The distance accounts for the players collider radius")]
+    [SerializeField]
+    private float _vaultRange = 0.5f;
+    /// <summary>
+    /// Is true if the player is within the roll window and wants to rolls
+    /// </summary>
+    private bool _doRoll = false;
+    /// <summary>
+    /// Stores if the player is currently in a roll, value or slide to avoid animations interrupting each other
+    /// </summary>
+    private bool m_inAnimation = false;
 
     #region Input Storage
     /// <summary>
-    /// Did the player press left shift 
+    /// Stores if the player pressed the slide key in an update loop between Fixed Updates
     /// </summary>
-    bool m_lShift = false;
+    private bool _slide = false;
     /// <summary>
-    /// Did the player press jump
+    /// Stores if the player pressed the jump key in an update loop between Fixed Updates
     /// </summary>
-    bool m_space = false;
+    private bool _jump = false;
     /// <summary>
-    /// Did the player press A or D
+    /// Stores if the lane swap keys were pressed between Fixed Updates
     /// </summary>
-    int m_swapLane = 0;
+    private int _swapLane = 0;
     #endregion
-
-    public float baseScoreMultiplier = 1;
-
+    /// <summary>
+    /// The score multiplier for the points gained due to time
+    /// </summary>
+    [Tooltip("The base multiplier for the points gained due to time")]
+    [SerializeField]
+    private float _baseScoreMultiplier = 1;
+    /// <summary>
+    /// The score multiplier for the points gained due to time
+    /// </summary>
+    public float BaseScoreMultiplier => _baseScoreMultiplier;
+    /// <summary>
+    /// The players current score
+    /// </summary>
     private float _score = 0;
-
+    /// <summary>
+    /// The players current score
+    /// </summary>
     public float Score
     {
-        get { return _score; }
-        set { _score = value; }
+        get => _score;
+        set => _score = value; 
     }
-
-    public bool IsDead => m_r.RagdollOn;
+    /// <summary>
+    /// Returns true if the player is dead
+    /// </summary>
+    public bool IsDead => _r.RagdollOn;
     /// <summary>
     /// Gets references to components
     /// </summary>
     private void Awake()
     {
-        m_a = transform.GetChild(0).GetComponent<Animator>();
-        m_r = m_a.GetComponent<Ragdoll>();
-        m_cc = transform.GetChild(1).GetComponent<CameraController>();
-        m_pc = GetComponent<PlayerController>();
-        m_lg = GameObject.FindGameObjectWithTag("GameManager").GetComponent<LevelGenerator>();
+        _a = transform.GetChild(0).GetComponent<Animator>();
+        _r = _a.GetComponent<Ragdoll>();
+        _cc = transform.GetChild(1).GetComponent<CameraController>();
+        _pc = GetComponent<PlayerController>();
+        _lg = GameObject.FindGameObjectWithTag("GameManager").GetComponent<LevelGenerator>();
     }
-
+    /// <summary>
+    /// Sets the static player reference to be this player. Sets the player to move forward and resets their position and variables
+    /// </summary>
     private void Start()
     {
         player = this;
-        m_move = Vector3.forward * m_runSpeed;
-        m_a.SetFloat("Forwards", 1);
+        //Set the player to be moving forwards
+        _move = Vector3.forward * _runSpeed;
+        _a.SetFloat("Forwards", 1);
 
         Reset();
     }
@@ -188,200 +268,229 @@ public class Player : MonoBehaviour
     /// If there is input, does the corresponding action
     /// </summary>
     private void FixedUpdate()
-    {
-        float fallingSpeed = m_move.y;
+    {   //Store the vertical velocity of the player. This is needed for fall damage deaths in Move
+        float fallingSpeed = _move.y;
         //Apply gravity
-        if (!m_pc.OnGround)
-            m_move += Physics.gravity * Time.fixedDeltaTime;
+        if (!_pc.OnGround)
+            _move += Physics.gravity * Time.fixedDeltaTime;
         else
-            m_move.y = 0;
-        ChangeLane(ref m_move);
-        ParkourMove(ref m_move);
-        Move(m_move, fallingSpeed);
+            _move.y = 0;
+        //Continue performing lane changes
+        ChangeLane();
+        //Perform any parkour moves necessary
+        ParkourMove();
+        //Move the player and check if they have died
+        Move(fallingSpeed);
     }
 
     private void Update()
     {   //Get the inputs
-        m_lShift = m_lShift || Input.GetKeyDown(SlideKey);
-        m_space = m_space || Input.GetKeyDown(JumpKey);
-
-        if (m_swapLane == 0 && Input.GetKeyDown(DodgeLeftKey))
-            m_swapLane = -1;
-        if (m_swapLane == 0 && Input.GetKeyDown(DodgeRightKey))
-            m_swapLane = 1;
+        _slide = _slide || Input.GetKeyDown(SlideKey);
+        _jump = _jump || Input.GetKeyDown(JumpKey);
+        //Get the lane swap input
+        if (_swapLane == 0 && Input.GetKeyDown(DodgeLeftKey))
+            _swapLane = -1;
+        else if (_swapLane == 0 && Input.GetKeyDown(DodgeRightKey))
+            _swapLane = 1;
     }
     /// <summary>
     /// Moves the player forward
     /// </summary>
-    private void Move(Vector3 moveVec, float fallingSpeed = 0)
+    private void Move(float fallingSpeed = 0)
     {   //If we are ragdolled. don't move
-        if (m_r.RagdollOn == true)
+        if (_r.RagdollOn == true)
             return;
-        //Cast the players movement
+        //Store if we are ragdolled, becayse otherwise we don't want to move
         bool doRagdoll = false;
 
+        //Cast the players movement
         //If it hits something, make sure its not a valid surface. Otherwise ragdoll
-        if (ColliderInfo.CastWithOffset(m_pc.colInfo, moveVec * Time.fixedDeltaTime, out RaycastHit hit)
-            && !m_pc.collidersToIgnore.Contains(hit.collider) 
+        if (ColliderInfo.CastWithOffset(_pc.colInfo, _move * Time.fixedDeltaTime, out RaycastHit hit)
+            //Are we supposed to ignore the collider. This is to avoid colliding with ourselves or an obstacle we are currently vaulting over
+            && !_pc.collidersToIgnore.Contains(hit.collider) 
             //If its a ramp, we don't need to check the tolerance as the direction won't be up.
             //If it IS a ramp, we need to check that we aren't colliding with its left or right sides
             && (!hit.transform.CompareTag("Ramp") || (InToleraceNorm(hit.normal, Vector3.right, 0.01f) || InToleraceNorm(hit.normal, -Vector3.right, 0.01f))) 
+            //Is the normal not pointing upwards, if its not, its not ground
             && !InToleraceNorm(hit.normal, Vector3.up, 0.01f)
             //If the player does not roll
-            || m_pc.OnGround && Mathf.Abs(fallingSpeed) > Mathf.Abs(m_fallKillSpeed) && m_rollTimer > m_rollReactionTime)
+            || _pc.OnGround && Mathf.Abs(fallingSpeed) > Mathf.Abs(_fallKillVelocity) && t_rollTimer > _rollReactionTime)
         {
             doRagdoll = true;
         }
 
         //If the player died, ragdoll them and don't move
         if (doRagdoll)
-            m_r.RagdollOn = true;
+            _r.RagdollOn = true;
         //Otherwise move and increment the score
         else
         {
-            m_pc.MoveTo(moveVec * Time.fixedDeltaTime);
-            _score += baseScoreMultiplier * Time.fixedDeltaTime;
+            _pc.MoveTo(_move * Time.fixedDeltaTime);
+            _score += _baseScoreMultiplier * Time.fixedDeltaTime;
         }
     }
     /// <summary>
     /// Moves the player into the correct lane
     /// </summary>
-    private void ChangeLane(ref Vector3 moveVec)
+    private void ChangeLane()
     {
         //Check if the player can change lane this frame
         //If we are in a slide or vault, the player cannot change lanes
-        if (!m_inAnimation && m_laneSwapTimer > m_laneSwapTime)
+        if (!m_inAnimation && t_laneSwapTimer > _laneSwapTime)
         {
             //Check if the player wants to change lanes this frame and that the lane change is a valid lane change
-            if (m_lane != 0 && m_swapLane < 0)
+            if (_lane != 0 && _swapLane < 0)
             {
-                m_lane--;
-                m_laneSwapTimer = 0;
+                _lane--;
+                t_laneSwapTimer = 0;
             }
-            else if (m_lane != m_lg.m_numberOfLanes - 1 && m_swapLane > 0)
+            else if (_lane != _lg.m_numberOfLanes - 1 && _swapLane > 0)
             {
-                m_lane++;
-                m_laneSwapTimer = 0;
+                _lane++;
+                t_laneSwapTimer = 0;
             }
         }
         //Increment the timer
-        m_laneSwapTimer += Time.fixedDeltaTime;
+        t_laneSwapTimer += Time.fixedDeltaTime;
         //We don't need to clamp the value since we ensured it was valid when initially changing it.
         //Lerp the player over to the new lane
         //Calculate the total move vector we need to move along
-        moveVec.x = (m_lane * m_lg.m_laneWidth) - transform.position.x + m_lg.m_generateOffset.x;
+        _move.x = (_lane * _lg.m_laneWidth) - transform.position.x + _lg.m_generateOffset.x;
         //Scale it by the time until we reach the lane swap completion
-        moveVec.x *= Mathf.Clamp(m_laneSwapTimer, 0, m_laneSwapTime) / m_laneSwapTime;
+        _move.x *= Mathf.Clamp(t_laneSwapTimer, 0, _laneSwapTime) / _laneSwapTime;
         //Divide by time to ensure this is applied as pure velocity
-        moveVec.x /= Time.fixedDeltaTime;
-
-        m_swapLane = 0;
+        _move.x /= Time.fixedDeltaTime;
+        //Set the player to not be swapping lanes 
+        _swapLane = 0;
     }
     /// <summary>
     /// Checks and performs a parkour move if possible
     /// </summary>
-    private void ParkourMove(ref Vector3 moveVec)
+    private void ParkourMove()
     {   //Jump or Vault
-        if (m_pc.OnGround && !m_inAnimation && m_space)
+        if (_pc.OnGround && !m_inAnimation && _jump)
         {
             //Perform a raycast forwards to see if we detect a vaultable object
-            if (Physics.Raycast(m_pc.colInfo.GetLowerPoint(), Vector3.forward, out RaycastHit hit, m_pc.colInfo.TrueRadius + m_vaultRange)
+            if (Physics.Raycast(_pc.colInfo.GetLowerPoint(), Vector3.forward, out RaycastHit hit, _pc.colInfo.TrueRadius + _vaultRange)
+                //If the hit object is vaultable, do a vault
                 && hit.transform.CompareTag("Vaultable"))
-            {
-                m_pc.collidersToIgnore.Add(hit.collider);
-                m_a.SetTrigger("Vault");
+            {   //Ignore the collider of the vaultable object as otherwise we need to freeze the players Y and change their collider
+                //Which was the previous method. This in turn caused the player to have clipping issues
+                _pc.collidersToIgnore.Add(hit.collider);
+                _a.SetTrigger("Vault");
             }
             else
                 //Otherwise, do a jump
-                moveVec.y = m_jumpVelocity;
+                _move.y = _jumpVelocity;
         }
 
         //Slide or Roll
-        if (!m_inAnimation && m_lShift)
+        if (!m_inAnimation && _slide)
         {
-            //Slide
-            if (m_pc.OnGround)
+            //Slide but only if we aren't planning on rolling
+            if (_pc.OnGround && !_doRoll)
             {
-                //Adjust the players collider
-                m_cc.m_ignoreYAxisOnHeadFollow = true;
-                m_a.SetTrigger("Crouch");
+                //Set the camera to ignore the Y rotation of the players head for the sake of mkaing things look good
+                _cc.IgnoreYAxisOnHeadFollow = true;
+                _a.SetTrigger("Crouch");
             }
             else
-            {
-                m_rollTimer = 0;
-                m_doRoll = true;
+            {   //Otherwise do a roll
+                t_rollTimer = 0;
+                _doRoll = true;
             }
         }
-
-        if (m_doRoll && m_pc.OnGround && m_rollTimer <= m_rollReactionTime)
+        //If we have met the roll conditions, do the roll
+        if (_doRoll && _pc.OnGround && t_rollTimer <= _rollReactionTime)
         {
-            m_doRoll = false;
-            m_a.SetTrigger("Roll");
+            _doRoll = false;
+            _a.SetTrigger("Roll");
         }
         //If we run out of time for a roll, set us to not be doing a roll any more
-        else if (m_rollTimer > m_rollReactionTime)
-            m_doRoll = false;
-
-        m_rollTimer += Time.deltaTime;
-        m_space = false;
-        m_lShift = false;
+        else if (t_rollTimer > _rollReactionTime)
+            _doRoll = false;
+        //Increment the roll timer and reset the input keys
+        t_rollTimer += Time.deltaTime;
+        _jump = false;
+        _slide = false;
     }
-
+    /// <summary>
+    /// Resets the players collider and sets them not to be in an animation
+    /// </summary>
     public void GetUp()
     {
-        m_pc.colInfo.UpperHeight = 1;
+        _pc.colInfo.UpperHeight = 1;
         m_inAnimation = false;
     }
-
+    /// <summary>
+    /// Lowers the players collider
+    /// </summary>
     public void EnterSlide()
     {
-        m_pc.colInfo.UpperHeight = 0;
+        _pc.colInfo.UpperHeight = 0;
     }
-
+    /// <summary>
+    /// Returns the camera to normal for regular running
+    /// </summary>
     public void ReleaseCamera()
     {
-        m_cc.followHead = false;
-        m_cc.m_ignoreYAxisOnHeadFollow = false;
+        _cc.FollowHead = false;
+        _cc.IgnoreYAxisOnHeadFollow = false;
     }
-
+    /// <summary>
+    /// Sets us to not be in an animation and remove the collider of the vaultable object from the colliders to ignore
+    /// </summary>
     public void ExitVault()
     {
         m_inAnimation = false;
-        m_pc.collidersToIgnore.RemoveAt(m_pc.collidersToIgnore.Count - 1);
+        _pc.collidersToIgnore.RemoveAt(_pc.collidersToIgnore.Count - 1);
     }
-
+    /// <summary>
+    /// Set the camera to follow the head and state that we are in an animation
+    /// </summary>
     public void EnterAnim()
     {
-        m_cc.followHead = true;
+        _cc.FollowHead = true;
         m_inAnimation = true;
     }
-
+    /// <summary>
+    /// Resets the players position, score, ragdoll state, animation and input variables
+    /// </summary>
     public void Reset()
-    {
-        m_r.RagdollOn = false;
-        m_a.Play("Base Layer.Blend Tree", 0);
-        m_cc.ResetRotation();
-
-        m_move = Vector3.forward * m_runSpeed;
+    {   //Stop us from ragdolling
+        _r.RagdollOn = false;
+        //Reset our animation
+        _a.Play("Base Layer.Blend Tree", 0);
+        //Reset the camera rotation
+        _cc.ResetRotation();
+        //Reset the move vector
+        _move = Vector3.forward * _runSpeed;
+        //Reset the score
         _score = 0;
         //Set the starting lane for the player
-        m_lane = m_lg.m_numberOfLanes / 2;
+        _lane = _lg.m_numberOfLanes / 2;
 
         //Set the position of the player to spawn ever so slightly above the ground
-        Vector3 pos = transform.position;
-        pos.y = m_pc.colInfo.LowerHeight + m_pc.colInfo.CollisionOffset * 2 + m_lg.m_tileHeight * 1.5f + m_lg.m_generateOffset.y;
-        pos.z = m_lg.m_generateOffset.z;
-        pos.x = m_lg.m_laneWidth * m_lane + m_lg.m_generateOffset.x;
+        Vector3 pos;
+        pos.y = _pc.colInfo.LowerHeight + _pc.colInfo.CollisionOffset * 2 + _lg.m_tileHeight * 1.5f + _lg.m_generateOffset.y;
+        pos.z = _lg.m_generateOffset.z;
+        pos.x = _lg.m_laneWidth * _lane + _lg.m_generateOffset.x;
         transform.position = pos;
-
-        m_doRoll = false;
-        m_space = false;
-        m_lShift = false;
+        //Reset the input values and other variables for keeping track on animations
+        _doRoll = false;
+        _jump = false;
+        _slide = false;
         m_inAnimation = false;
-        m_cc.followHead = false;
-        m_swapLane = 0;
+        _cc.FollowHead = false;
+        _swapLane = 0;
     }
-
+    /// <summary>
+    /// Determines if a given vector3 is pointing in the same direction as another
+    /// </summary>
+    /// <param name="target">The Vector to compare</param>
+    /// <param name="expected">The vector to compare to</param>
+    /// <param name="tolerance">The difference in dot product from 1 to return true</param>
+    /// <returns>Returns true if the Dot of Target normalized onto expectred normalized is > the 1 - tolerance </returns>
     private bool InToleraceNorm(Vector3 target, Vector3 expected, float tolerance)
     {
         float dot = Vector3.Dot(target.normalized, expected.normalized);
