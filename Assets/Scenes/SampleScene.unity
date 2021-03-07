@@ -1116,6 +1116,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 454800402}
   m_CullTransparentMesh: 0
+--- !u!4 &540973859 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 15723218886475979, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
+  m_PrefabInstance: {fileID: 554056370}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &554056370
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1187,6 +1192,10 @@ PrefabInstance:
       propertyPath: m_ConnectedAnchor.z
       value: -0.017300006
       objectReference: {fileID: 0}
+    - target: {fileID: 736398711356043665, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
+      propertyPath: _parentTrans
+      value: 
+      objectReference: {fileID: 540973859}
     - target: {fileID: 2303620862736176729, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
       propertyPath: m_ConnectedAnchor.z
       value: -0.02568812
@@ -2406,10 +2415,6 @@ PrefabInstance:
     - target: {fileID: 8599937984738530562, guid: 7963520399eb0dd4281730ae35ff0056, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8599937984738530563, guid: 7963520399eb0dd4281730ae35ff0056, type: 3}
-      propertyPath: m_initalFlatLength
-      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8599937984738530563, guid: 7963520399eb0dd4281730ae35ff0056, type: 3}
       propertyPath: obstacles.Array.data[2]

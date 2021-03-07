@@ -45,20 +45,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_laneWidth: 3
-  m_tileHeight: 4
+  m_layerHeight: 4
   m_tileLength: 5
   m_numberOfLanes: 5
   m_numberOfLayers: 3
   m_maxHeightChange: 2
   m_levelLength: 20
-  m_initalFlatLength: 10
+  m_initalFlatLength: 5
   m_distanceUntilLoop: 100
   m_tilePrefab: {fileID: 2885713471867661396, guid: ff0178799a7e14244b4a36c1bf7ee377, type: 3}
   m_slopePrefab: {fileID: 7674213680519279055, guid: 9bec8ac7641609f42bee86402b634e6b, type: 3}
   m_generateOffset: {x: -15, y: 1, z: 0}
   m_tiles: []
-  minSpaceBetweenObstacles: 4
-  maxSpaceBetweenObstacles: 6
+  _minSpaceBetweenObstacles: 4
+  _maxSpaceBetweenObstacles: 6
   obstacles:
   - {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
   - {fileID: 7618985421749997523, guid: b8af832617a7fc74b88acaef352ef81c, type: 3}
@@ -76,3 +76,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43c7aa24ac570214ba3f2ac1cd107821, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_pauseMenu: {fileID: 0}
+  m_deadText: {fileID: 0}

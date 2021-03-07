@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 /// <summary>
 /// Generates a level
@@ -10,115 +9,184 @@ public class LevelGenerator : MonoBehaviour
     /// <summary>
     /// The width of a lane
     /// </summary>
-    public float m_laneWidth = 2;
+    [Tooltip("The width of a lane")]
+    [SerializeField]
+    private float m_laneWidth = 2;
+    /// <summary>
+    /// The width of a lane
+    /// </summary>
+    public float LaneWidth => m_laneWidth;
     /// <summary>
     /// The height of a tile
     /// </summary>
-    public float m_tileHeight = 2;
+    [Tooltip("The height of a layer")]
+    [SerializeField]
+    private float m_layerHeight = 2;
+    /// <summary>
+    /// The height of a tile
+    /// </summary>
+    public float LayerHeight => m_layerHeight;
     /// <summary>
     /// The length of a tile
     /// </summary>
-    public float m_tileLength = 7;
+    [Tooltip("The length of a tile")]
+    [SerializeField]
+    private float m_tileLength = 7;
+    /// <summary>
+    /// The length of a tile
+    /// </summary>
+    public float TileLength => m_tileLength;
     /// <summary>
     /// The number of lanes
     /// </summary>
-    public uint m_numberOfLanes = 3;
+    [Tooltip("The number of lanes")]
+    [SerializeField]
+    private uint m_numberOfLanes = 3;
+    /// <summary>
+    /// The number of lanes
+    /// </summary>
+    public uint NumberOfLanes => m_numberOfLanes;
     /// <summary>
     /// The number of layers
     /// </summary>
-    public uint m_numberOfLayers = 3;
+    [Tooltip("The number of layers")]
+    [SerializeField]
+    private uint m_numberOfLayers = 3;
+    /// <summary>
+    /// The number of layers
+    /// </summary>
+    public uint NumberOfLayers => m_numberOfLayers;
     /// <summary>
     /// The maximum change in height
     /// </summary>
-    public uint m_maxHeightChange = 3;
+    [Tooltip("The maximum height both positively and negatively changed when a lane changes height")]
+    [SerializeField]
+    private uint m_maxHeightChange = 3;
     /// <summary>
     /// The length of the level. Currently used for debugging only
     /// </summary>
-    public int m_levelLength = 20;
+    [Tooltip("The length of the level after the flat period. Total length of level is this + initialFlatLength")]
+    [SerializeField]
+    private int m_levelLength = 20;
     /// <summary>
     /// The length of the flat section at the very beginning of each run
     /// </summary>
-    public int m_initalFlatLength = 7;
+    [Tooltip("The length of the inital flat peroid of terrain without obstacles. Total length of level is this + levelLength")]
+    [SerializeField]
+    private int m_initalFlatLength = 7;
     /// <summary>
     /// The distance until the game moves everything back towards 0,0,0 to avoid funky lighting
     /// </summary>
-    public float m_distanceUntilLoop = 100;
+    [Tooltip("The distance the player travels until the game moves everything back towards the origin of the world to avoid floating point errors")]
+    [SerializeField]
+    private float m_distanceUntilLoop = 100;
     /// <summary>
     /// The prefab to use for general tiles
     /// </summary>
-    public GameObject m_tilePrefab = null;
+    [Tooltip("The prefab used for generating tiles. The object should be a perfect cube with no scale. It will be scaled upon initialisation")]
+    [SerializeField]
+    private GameObject m_tilePrefab = null;
     /// <summary>
     /// The prefab used for slopes
     /// </summary>
-    public GameObject m_slopePrefab = null;
+    [Tooltip("The prefab used for generating slopes. Angle of slope should be 45 degrees as it is scaled up upon generation")]
+    [SerializeField]
+    private GameObject m_slopePrefab = null;
     /// <summary>
-    /// The positional offset of the level
+    /// The positional offset of the level from the origin
     /// </summary>
-    public Vector3 m_generateOffset = new Vector3();
+    [Tooltip("The offset of the level upon generation in global co-ordinates")]
+    [SerializeField]
+    private Vector3 m_generateOffset = new Vector3();
+    /// <summary>
+    /// The positional offset of the level from the origin
+    /// </summary>
+    public Vector3 GenerateOffset => m_generateOffset;
     /// <summary>
     /// A list of all active tiles for debugging purposes
     /// </summary>
-    public List<TileInfo> m_tiles = new List<TileInfo>();
+    //Show for debugging purposes
+    [Tooltip("The tiles generated")]
+    [SerializeField]
+    private List<TileInfo> m_tiles = new List<TileInfo>();
     /// <summary>
     /// The min number of tiles between obstacle spawns
     /// </summary>
-    public uint minSpaceBetweenObstacles = 2;
+    [Tooltip("The max number of tiles between obstacle spawns")]
+    [SerializeField]
+    private uint _minSpaceBetweenObstacles = 2;
     /// <summary>
     /// The max number of tiles between obstacle spawns
     /// </summary>
-    public uint maxSpaceBetweenObstacles = 4;
+    [Tooltip("The max number of tiles between obstacle spawns")]
+    [SerializeField]
+    private uint _maxSpaceBetweenObstacles = 4;
     /// <summary>
     /// All of the obstacles you want to be able to spawn
     /// </summary>
-    public GameObject[] obstacles;
+    [Tooltip("All of the obstacles you want to be able to spawn")]
+    [SerializeField]
+    private GameObject[] obstacles = new GameObject[0];
     /// <summary>
-    /// The probability for the height of a lane to change
+    /// The probability for the height of a tile to change when generated
     /// </summary>
+    [Tooltip("The probability for the height of a tile to change when generated")]
     [Range(0,1)]
-    public float m_probabilityToChangeHeight = 0.1f;
+    [SerializeField]
+    private float m_probabilityToChangeHeight = 0.1f;
+    /// <summary>
+    /// The probability for the height of a tile to change when generated
+    /// </summary>
+    public float ProbabilityToChangeHeight => m_probabilityToChangeHeight;
     /// <summary>
     /// The probability for a ramp to spawn even if its not needed
     /// </summary>
+    [Tooltip("The probability for a ramp to spawn on a height change of +1 even if its unnecessary")]
     [Range(0,1)]
-    public float m_probabilityForNonRequiredRamps = 0.5f;
+    [SerializeField]
+    private float m_probabilityForNonRequiredRamps = 0.5f;
+    /// <summary>
+    /// The probability for a ramp to spawn even if its not needed
+    /// </summary>
+    public float ProbabilityForNonRequiredRamp => m_probabilityForNonRequiredRamps;
     /// <summary>
     /// An array to store how long until a lane can spawn an obstacle
     /// </summary>
-    private uint[] laneObstacleTimer = new uint[0];
+    private uint[] _laneObstacleTimer = new uint[0];
     /// <summary>
     /// The current length of the level. Used when extending the level.
     /// </summary>
-    private int m_currentLength = 0;
+    private int _currentLength = 0;
     /// <summary>
     /// The "position" of the front most tile. This is in grid cords not world cords
     /// </summary>
-    private int m_frontTilePos = 0;
+    private int _frontTilePos = 0;
     /// <summary>
-    /// Store a reference to the players transform
+    /// Store a reference to the players transform for distance and position calculations
     /// </summary>
-    private Transform player;
+    private Transform _player;
     /// <summary>
     /// Initalises some variables
     /// </summary>
     private void Awake()
     {
-        m_frontTilePos = 0;
-        m_currentLength = 0;
+        _frontTilePos = 0;
+        _currentLength = 0;
         //By dividing it into and casting it to an int, we effectively round the value to be a multiple of tile Length
         //Basically becoming how many tiles until a loop occurs. We then cast it to an int to chop off decimal points
         //Before them multiplying it back by tile length to convert it back into a distance
         m_distanceUntilLoop = (int)(m_distanceUntilLoop / m_tileLength) * m_tileLength;
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        _player = GameObject.FindGameObjectWithTag("Player").transform;
     }
     /// <summary>
-    /// Generates a level upon starting the game for debugging purposes
+    /// Generates a level upon starting the game
     /// </summary>
     private void Start()
     {
         CreateLevel();
     }
     /// <summary>
-    /// Generates the world
+    /// Generates a new world
     /// </summary>
     [ContextMenu("Regenerate Level")]
     public void CreateLevel()
@@ -134,7 +202,10 @@ public class LevelGenerator : MonoBehaviour
     {
         ExtendLevel(5);
     }
-
+    /// <summary>
+    /// Extends the length of the world by the given length
+    /// </summary>
+    /// <param name="length">The number of rows to generate</param>
     public void ExtendLevel(uint length)
     {
         GenerateLevel(length, false);
@@ -149,18 +220,18 @@ public class LevelGenerator : MonoBehaviour
     {   //If we already have tiles and are trying to generate more, delete the previous ones. Primarily for debugging
         if (regenerate && m_tiles.Count != 0)
         {
-            m_frontTilePos = 0;
-            m_currentLength = 0;
+            _frontTilePos = 0;
+            _currentLength = 0;
             DeleteLevel();
         }
 
         if (regenerate)
         {
-            if (laneObstacleTimer.Length != m_numberOfLanes)
-                laneObstacleTimer = new uint[m_numberOfLanes];
+            if (_laneObstacleTimer.Length != m_numberOfLanes)
+                _laneObstacleTimer = new uint[m_numberOfLanes];
 
             for (int lane = 0; lane < m_numberOfLanes; lane++)
-                laneObstacleTimer[lane] = (uint)Random.Range((int)minSpaceBetweenObstacles, (int)maxSpaceBetweenObstacles);
+                _laneObstacleTimer[lane] = (uint)Random.Range((int)_minSpaceBetweenObstacles, (int)_maxSpaceBetweenObstacles);
         }
         GameObject obstacle;
         bool canChangeHeight;
@@ -168,9 +239,9 @@ public class LevelGenerator : MonoBehaviour
         int[] prevHeights = new int[m_numberOfLanes];
         int tileIndex;
 
-        for (int i = m_currentLength; i < layersToGenerate + m_currentLength; i++)
+        for (int i = _currentLength; i < layersToGenerate + _currentLength; i++)
         {
-            tileIndex = i - m_frontTilePos;
+            tileIndex = i - _frontTilePos;
 
             for (int lane = 0; lane < m_numberOfLanes; lane++)
             {
@@ -263,41 +334,46 @@ public class LevelGenerator : MonoBehaviour
                     if (m_tiles[currentTile].IsRamp)
                         continue;
 
-                    if (laneObstacleTimer[lane] != 0)
-                        laneObstacleTimer[lane]--;
+                    if (_laneObstacleTimer[lane] != 0)
+                        _laneObstacleTimer[lane]--;
                     //If they have reached 0, check if we can spawn an obstacle on that tile
                     else if (!m_tiles[currentTile - (int)m_numberOfLanes].IsRamp)
                     {
                         //Select a random obstacle to spawn
                         obstacle = obstacles[Random.Range(0, obstacles.Length)];
                         TileInfo tile = m_tiles[currentTile];
-                        tile.AddObstacle(obstacle, m_laneWidth, m_tileHeight, m_tileLength, m_generateOffset);
+                        tile.AddObstacle(obstacle, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset);
 
                         m_tiles[currentTile] = tile;
                         //Reset the timer
-                        laneObstacleTimer[lane] = (uint)Random.Range((int)minSpaceBetweenObstacles, (int)maxSpaceBetweenObstacles);
+                        _laneObstacleTimer[lane] = (uint)Random.Range((int)_minSpaceBetweenObstacles, (int)_maxSpaceBetweenObstacles);
                     }
                 }
 
             //Actually generate the lanes boxes and stuff
             for (int lane = 0; lane < m_numberOfLanes; lane++)
-                m_tiles[tileIndex * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_tileHeight, m_tileLength, m_generateOffset);
+                m_tiles[tileIndex * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset);
         }
 
-        m_currentLength += (int)layersToGenerate;
+        _currentLength += (int)layersToGenerate;
     }
     /// <summary>
-    /// Delets the level
+    /// Deletes all tiles and the objects they contain
     /// </summary>
     [ContextMenu("Delete Level")]
     void DeleteLevel()
-    {
+    {   //Loop through the tiles
         for (int i = 0; i < m_tiles.Count; i++)
+            //Loop through the objects on the tile
             for (int objects = 0; objects < m_tiles[i].m_objectsOnTile.Length; objects++)
+                //Destroy the object
                 DestroyImmediate(m_tiles[i].m_objectsOnTile[objects]);
         m_tiles.Clear();
     }
-
+    /// <summary>
+    /// Deletes tiles from the front of the array
+    /// </summary>
+    /// <param name="tilesToDelete">The number of rows to delete</param>
     void DeleteFrontTiles(uint tilesToDelete)
     {
         for (int i = 0; i < tilesToDelete * m_numberOfLanes; i++)
@@ -308,22 +384,24 @@ public class LevelGenerator : MonoBehaviour
             m_tiles.RemoveAt(0);
         }
     }
-
+    /// <summary>
+    /// Keeps generating the world and deleting the previous world as well as looping the player back to 0, 0 every once in a while to avoid floating point error
+    /// </summary>
     private void FixedUpdate()
     {   //Keep generating the world
-        if (player.position.z > (m_frontTilePos + 1) * m_tileLength)
+        if (_player.position.z > (_frontTilePos + 1) * m_tileLength)
         {
-            m_frontTilePos++;
+            _frontTilePos++;
             DeleteFrontTiles(1);
             ExtendLevel(1);
         }
         //If the player gets too far away, teleport everything back
         //TLDR: Perform a loop
-        if (player.position.z > m_distanceUntilLoop)
+        if (_player.position.z > m_distanceUntilLoop)
         {   //Teleport the player
-            Vector3 p = player.position;
+            Vector3 p = _player.position;
             p.z -= m_distanceUntilLoop;
-            player.position = p;
+            _player.position = p;
 
             //player.position -= Vector3.forward * m_distanceUntilLoop;
             
@@ -338,13 +416,13 @@ public class LevelGenerator : MonoBehaviour
                 }
             }
             //Reset the length values so iterators remain valid and we don't generate 100 units in front of the level. That would be bad
-            m_frontTilePos = 0;
-            m_currentLength = m_tiles.Count / (int)m_numberOfLanes;
+            _frontTilePos = 0;
+            _currentLength = m_tiles.Count / (int)m_numberOfLanes;
         }
     }
 }
 /// <summary>
-/// Stores information about tiles
+/// Stores information about a given tile
 /// </summary>
 [System.Serializable]
 public struct TileInfo
@@ -355,43 +433,49 @@ public struct TileInfo
     /// <summary>
     /// The lane this tile exists on
     /// </summary>
-    public uint m_lane;
+    private uint _lane;
+    /// <summary>
+    /// The lane this tile exists on
+    /// </summary>
+    public uint Lane => _lane;
+    /// <summary>
+    /// The Z location of the tile in grid co-ordinates
+    /// </summary>
+    private uint _forwardPoint;
+    /// <summary>
+    /// The Z location of the tile in grid co-ordinates
+    /// </summary>
+    public uint ForwardPoint => _forwardPoint;
     /// <summary>
     /// The height of this tile
     /// </summary>
-    private uint m_height;
-    /// <summary>
-    /// The Z location of the tile
-    /// </summary>
-    public uint m_forwardPoint;
-    /// <summary>
-    /// Is the tile a ramp
-    /// </summary>
-    private bool m_isRamp;
-    /// <summary>
-    /// Was this a tile that has been propperly generated
-    /// </summary>
-    public bool isValid;
+    private uint _height;
     /// <summary>
     /// Gets or sets the height
     /// </summary>
     public uint Height
     {
-        get { return m_height; }
+        get { return _height; }
         set
         {
-            m_height = value;
+            _height = value;
         }
     }
-
+    /// <summary>
+    /// Is the tile a ramp
+    /// </summary>
+    private bool _isRamp;
+    /// <summary>
+    /// Does this tile contain a ramp
+    /// </summary>
     public bool IsRamp
     {
-        get { return m_isRamp; }
+        get { return _isRamp; }
         set
-        {
-            m_isRamp = value;
+        {   //Adjust the size of the objects on this tile based on whether this tile needs to store a ramp
+            _isRamp = value;
             GameObject obstacle = m_objectsOnTile[m_objectsOnTile.Length - 1];
-            int length = m_isRamp ? 2 : 1;
+            int length = _isRamp ? 2 : 1;
             length += obstacle != null ? 1 : 0;
             m_objectsOnTile = new GameObject[length];
             m_objectsOnTile[length - 1] = obstacle;
@@ -406,14 +490,13 @@ public struct TileInfo
     /// <param name="forwardPoint">The z step of this tile</param>
     /// <param name="isRamp">If this tile is a ramp</param>
     public void Initialise(uint lane, uint height, uint forwardPoint, bool isRamp)
-    {
+    {   //Set the length of objects to store
         int length = isRamp ? 2 : 1;
         m_objectsOnTile = new GameObject[length];
-        m_lane = lane;
-        m_height = height;
-        m_forwardPoint = forwardPoint;
-        isValid = true;
-        m_isRamp = isRamp;
+        _lane = lane;
+        _height = height;
+        _forwardPoint = forwardPoint;
+        _isRamp = isRamp;
     }
     /// <summary>
     /// Generates the tile based on the information given in the initialiser
@@ -428,16 +511,19 @@ public struct TileInfo
     {
         GameObject obj;
         //Generate the regular cube for the ground
-        obj = GameObject.Instantiate(tilePrefab, new Vector3(laneWidth * m_lane + posOffset.x, ((float)(m_isRamp ? m_height - 1 : m_height) / 2) * tileHeight + posOffset.y, m_forwardPoint * tileLength + posOffset.z), Quaternion.identity);
-        obj.transform.localScale = new Vector3(laneWidth, tileHeight * (m_isRamp ? m_height : m_height + 1), tileLength);
-
+        obj = GameObject.Instantiate(tilePrefab, new Vector3(laneWidth * _lane + posOffset.x, ((float)(_isRamp ? _height - 1 : _height) / 2) * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+        //Scale it up so we only have to use 1 object for the ground
+        obj.transform.localScale = new Vector3(laneWidth, tileHeight * (_isRamp ? _height : _height + 1), tileLength);
+        //Store it
         m_objectsOnTile[0] = obj;
         //If we have a ramp, create it
-        if (m_isRamp)
+        if (_isRamp)
         {
-            obj = GameObject.Instantiate(tileSlope, new Vector3(laneWidth * m_lane + posOffset.x, m_height * tileHeight + posOffset.y, m_forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+            //Create the ramp
+            obj = GameObject.Instantiate(tileSlope, new Vector3(laneWidth * _lane + posOffset.x, _height * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+            //Scale the ramp to fit the tile
             obj.transform.localScale = new Vector3(laneWidth, tileHeight, tileLength);
-
+            //Store it
             m_objectsOnTile[1] = obj;
         }
     }
@@ -446,11 +532,13 @@ public struct TileInfo
     /// </summary>
     /// <param name="obstacle">The obstacle to create and add</param>
     public void AddObstacle(GameObject obstacle, float laneWidth, float tileHeight, float tileLength, Vector3 posOffset)
-    {
-        int length = m_isRamp ? 2 : 1;
+    {   //Increase the length of objectsOnTiles to fit the obstacle
+        int length = _isRamp ? 2 : 1;
         length += obstacle != null ? 1 : 0;
         m_objectsOnTile = new GameObject[length];
-        GameObject obj = GameObject.Instantiate(obstacle, new Vector3(laneWidth * m_lane + posOffset.x, (m_height + 0.5f) * tileHeight + posOffset.y, m_forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+        //Spawn the obstacle
+        GameObject obj = GameObject.Instantiate(obstacle, new Vector3(laneWidth * _lane + posOffset.x, (_height + 0.5f) * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+        //Store the object
         m_objectsOnTile[length - 1] = obj;
     }
     /// <summary>
@@ -458,10 +546,11 @@ public struct TileInfo
     /// </summary>
     /// <param name="obstacle">The obstacle to add</param>
     public void AddObstacle(ref GameObject obstacle)
-    {
-        int length = m_isRamp ? 2 : 1;
+    {   //Increase the length of objectsOnTiles to fit the obstacle
+        int length = _isRamp ? 2 : 1;
         length += obstacle != null ? 1 : 0;
         m_objectsOnTile = new GameObject[length];
+        //Store the object
         m_objectsOnTile[length - 1] = obstacle;
     }
 }

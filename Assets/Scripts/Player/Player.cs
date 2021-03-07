@@ -296,6 +296,7 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Moves the player forward
     /// </summary>
+    /// <param name="fallingSpeed">The speed the player was falling at the very start of this cycle. Before gravity</param>
     private void Move(float fallingSpeed = 0)
     {   //If we are ragdolled. don't move
         if (_r.RagdollOn == true)
@@ -344,7 +345,7 @@ public class Player : MonoBehaviour
                 _lane--;
                 t_laneSwapTimer = 0;
             }
-            else if (_lane != _lg.m_numberOfLanes - 1 && _swapLane > 0)
+            else if (_lane != _lg.NumberOfLanes - 1 && _swapLane > 0)
             {
                 _lane++;
                 t_laneSwapTimer = 0;
@@ -355,7 +356,7 @@ public class Player : MonoBehaviour
         //We don't need to clamp the value since we ensured it was valid when initially changing it.
         //Lerp the player over to the new lane
         //Calculate the total move vector we need to move along
-        _move.x = (_lane * _lg.m_laneWidth) - transform.position.x + _lg.m_generateOffset.x;
+        _move.x = (_lane * _lg.LaneWidth) - transform.position.x + _lg.GenerateOffset.x;
         //Scale it by the time until we reach the lane swap completion
         _move.x *= Mathf.Clamp(t_laneSwapTimer, 0, _laneSwapTime) / _laneSwapTime;
         //Divide by time to ensure this is applied as pure velocity
@@ -468,13 +469,13 @@ public class Player : MonoBehaviour
         //Reset the score
         _score = 0;
         //Set the starting lane for the player
-        _lane = _lg.m_numberOfLanes / 2;
+        _lane = _lg.NumberOfLanes / 2;
 
         //Set the position of the player to spawn ever so slightly above the ground
         Vector3 pos;
-        pos.y = _pc.colInfo.LowerHeight + _pc.colInfo.CollisionOffset * 2 + _lg.m_tileHeight * 1.5f + _lg.m_generateOffset.y;
-        pos.z = _lg.m_generateOffset.z;
-        pos.x = _lg.m_laneWidth * _lane + _lg.m_generateOffset.x;
+        pos.y = _pc.colInfo.LowerHeight + _pc.colInfo.CollisionOffset * 2 + _lg.LayerHeight * 1.5f + _lg.GenerateOffset.y;
+        pos.z = _lg.GenerateOffset.z;
+        pos.x = _lg.LaneWidth * _lane + _lg.GenerateOffset.x;
         transform.position = pos;
         //Reset the input values and other variables for keeping track on animations
         _doRoll = false;
