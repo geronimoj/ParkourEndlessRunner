@@ -240,6 +240,13 @@ public class Player : MonoBehaviour
     /// Returns true if the player is dead
     /// </summary>
     public bool IsDead => _r.RagdollOn;
+#if DEBUG
+    public GameObject avatar;
+
+    public Transform rootBone;
+
+    public GameObject modelToSwapTo;
+#endif
     /// <summary>
     /// Gets references to components
     /// </summary>
@@ -260,7 +267,10 @@ public class Player : MonoBehaviour
         //Set the player to be moving forwards
         _move = Vector3.forward * _runSpeed;
         _a.SetFloat("Forwards", 1);
-
+#if DEBUG
+        if (avatar != null && rootBone != null && modelToSwapTo != null)
+            SkinnedMeshBoneRebinder.SwapModel(avatar, rootBone, modelToSwapTo, "mixamorig:");
+#endif
         Reset();
     }
     /// <summary>
