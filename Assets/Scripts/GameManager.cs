@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
         if (!m_pauseMenu.activeSelf && Input.GetKeyDown(KeyCode.Return))
         {
             m_lg.CreateLevel();
-            m_p.Reset();
+            m_p.ResetPlayer();
         }
 
         m_deadText.SetActive(m_p.IsDead);

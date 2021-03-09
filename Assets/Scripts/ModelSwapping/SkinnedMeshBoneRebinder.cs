@@ -8,20 +8,18 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
     /// Swaps the model of avatar, being an avatar to the model of the avatar 'targetModel'
     /// The bone heirachies of both avatars should be identical in name with the target being allowed a suffix
     /// </summary>
-    /// <param name="avatar">The players avatar.</param>
-    /// <param name="rootBone">The root bone of the players avatar.</param>
-    /// <param name="targetModel">The target avatar who you want to take the model from</param>
-    /// <param name="targetRootBone">The root bone of the target avatar</param>
+    /// <param name="avatar">Contains the default avatar, reference to the players rootbone and reference to the players models</param>
+    /// <param name="targetModel">The target model with its avatar</param>
     /// <param name="targetBoneSuffix">The suffix on the name of targetModels bone heirachy</param>
     /// <returns>Returns false if it fails to swap models</returns>
-    public static bool SwapModel(GameObject avatar, Transform rootBone, GameObject targetModel, string targetBoneSuffix = "")
+    public static bool SwapModel(ModelInfo avatar, ModelInfo targetModel, string targetBoneSuffix = "")
     {
-        if (avatar == null || rootBone == null || targetModel == null)
+        if (!avatar.IsValid || avatar.RootBone == null || !targetModel.IsValid)
             return false;
         //Get the skinned mesh renderer of the target model
-        SkinnedMeshRenderer[] targetRenderer = targetModel.GetComponentsInChildren<SkinnedMeshRenderer>();
+        SkinnedMeshRenderer[] targetRenderer = targetModel.Model.GetComponentsInChildren<SkinnedMeshRenderer>();
         //We get the avatars models which we use to know where to store the new mesh renderers and which skinnedMeshRenderers to delete
-        List<SkinnedMeshRenderer> avatarRenderer = new List<SkinnedMeshRenderer>(avatar.GetComponentsInChildren<SkinnedMeshRenderer>());
+        List<SkinnedMeshRenderer> avatarRenderer = new List<SkinnedMeshRenderer>(avatar.Model.GetComponentsInChildren<SkinnedMeshRenderer>());
         //If we have nothing to copy, don't do anything
         if (targetRenderer.Length == 0)
             return false;
@@ -71,7 +69,6 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
 
         //Step 3: loop over the bones of the target renderer and copy the bone locations over relative to our root bone using their names
         string name;
-
         for (int rend = 0; rend < targetRenderer.Length; rend++)
         {
             Transform[] tBones = targetRenderer[rend].bones;
@@ -82,21 +79,12 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
                 if (name.StartsWith(targetBoneSuffix))
                     name = name.Remove(0, targetBoneSuffix.Length);
                 //Loop over all transforms the player has and check if they are valid.
-                foreach (Transform t in rootBone.GetComponentsInChildren<Transform>())
+                foreach (Transform t in avatar.RootBone.GetComponentsInChildren<Transform>())
                 {
                     //Otherwise time to loop through the transforms
                     if (name == t.name)
                     {
                         aBones[bone] = t;
-                        //Update the transform position of our bones to match theirs
-                        t.localPosition = tBones[bone].localPosition;
-
-                        BoneRotationFixer brf = t.GetComponent<BoneRotationFixer>();
-                        if (brf == null)
-                            brf = t.gameObject.AddComponent<BoneRotationFixer>();
-
-                        //brf.localRotationOffset = Vector3.zero - tBones[bone].localEulerAngles;
-
                         continue;
                     }
                 }
@@ -105,9 +93,8 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
             avatarRenderer[rend].bones = aBones;
         }
 
-        Avatar av;
-        HumanDescription h = targetModel.GetComponentInChildren<Animator>().avatar.humanDescription;
-        HumanDescription aH = avatar.GetComponentInChildren<Animator>().avatar.humanDescription;
+        HumanDescription h = targetModel.ModelAvatar.humanDescription;
+        HumanDescription aH = avatar.ModelAvatar.humanDescription;
         //Loop over the human bone avatar description
         //And set to use default values to avoid having to copy over other stuff to make things easier
         for (int i = 0; i < aH.human.Length; i++)
@@ -140,15 +127,15 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
         }
         aH.skeleton = aSkBones.ToArray();
         //Ensure the names are the same. Because of heirachy issues, we need to set the rootBones parents name simply because we can't change the parent naming heirachy in SkeletonBone struct
-        rootBone.parent.name = aH.skeleton[0].name;
+        avatar.Model.name = aH.skeleton[0].name;
         //Now that we have fixed up the human bones and skeleton bones we copy those two arrays into h specifically
         h.human = aH.human;
         h.skeleton = aH.skeleton;
 
 
-        av = AvatarBuilder.BuildHumanAvatar(rootBone.parent.gameObject, h);
+        Avatar av = AvatarBuilder.BuildHumanAvatar(avatar.Model.gameObject, h);
         if (av.isValid)
-            avatar.GetComponentInChildren<Animator>().avatar = av;
+            avatar.Model.GetComponentInChildren<Animator>().avatar = av;
         
 
         return true;

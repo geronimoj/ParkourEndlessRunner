@@ -240,13 +240,17 @@ public class Player : MonoBehaviour
     /// Returns true if the player is dead
     /// </summary>
     public bool IsDead => _r.RagdollOn;
-#if DEBUG
-    public GameObject avatar;
-
-    public Transform rootBone;
-
-    public GameObject modelToSwapTo;
-#endif
+    /// <summary>
+    /// Stores information about the base model of which all generated avatars are built off of
+    /// </summary>
+    [Tooltip("The inital model to load with the avatar the skeleton originally used")]
+    [SerializeField]
+    private ModelInfo defaultModelInfo = new ModelInfo();
+    /// <summary>
+    /// The model that should be swapped to. Root bone is not necessary
+    /// </summary>
+    [Tooltip("The model that should be swapped to when calling SwapModel")]
+    public static ModelInfo modelToSwapTo = new ModelInfo();
     /// <summary>
     /// Gets references to components
     /// </summary>
@@ -264,16 +268,10 @@ public class Player : MonoBehaviour
     private void Start()
     {
         player = this;
-#if DEBUG
-        //Load the players model
-        if (avatar != null && rootBone != null && modelToSwapTo != null)
-            SkinnedMeshBoneRebinder.SwapModel(avatar, rootBone, modelToSwapTo, "mixamorig:");
-#endif
-        //Set the player to be moving forwards
-        _move = Vector3.forward * _runSpeed;
-        _a.SetFloat("Forwards", 1);
-
-        Reset();
+        //Clear the models so we don't swap to the same model again
+        modelToSwapTo.Clear();
+        //Reset the players position
+        ResetPlayer();
     }
     /// <summary>
     /// Moves the player forwards and checks for player input.
@@ -469,7 +467,7 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Resets the players position, score, ragdoll state, animation and input variables
     /// </summary>
-    public void Reset()
+    public void ResetPlayer()
     {   //Stop us from ragdolling
         _r.RagdollOn = false;
         //Reset our animation
@@ -498,6 +496,16 @@ public class Player : MonoBehaviour
         m_inAnimation = false;
         _cc.FollowHead = false;
         _swapLane = 0;
+    }
+    /// <summary>
+    /// Swaps the model to the model in Model To Swap To
+    /// </summary>
+    [ContextMenu("Swap Model")]
+    public void SwapModel()
+    {
+        //Load the players model
+        SkinnedMeshBoneRebinder.SwapModel(defaultModelInfo, modelToSwapTo, "mixamorig:");
+        modelToSwapTo.Clear();
     }
     /// <summary>
     /// Determines if a given vector3 is pointing in the same direction as another
