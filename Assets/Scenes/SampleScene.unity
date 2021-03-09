@@ -1275,6 +1275,14 @@ PrefabInstance:
       propertyPath: m_ConnectedAnchor.z
       value: -0.000000013038515
       objectReference: {fileID: 0}
+    - target: {fileID: 8830915935230255589, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
+      propertyPath: modelToSwapTo._modelAvatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 9cefdd0161b14334e9a89f0109f6aaad, type: 3}
+    - target: {fileID: 8830915935230255589, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
+      propertyPath: modelToSwapTo._model
+      value: 
+      objectReference: {fileID: 1575017634525026114, guid: b7bf1ddcdf4f86d4ea9a320ce34cafa0, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4fa2be9bfbd01924a8d5ac2b2eb2d2f4, type: 3}
 --- !u!1 &675748086

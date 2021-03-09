@@ -10,9 +10,8 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
     /// </summary>
     /// <param name="avatar">Contains the default avatar, reference to the players rootbone and reference to the players models</param>
     /// <param name="targetModel">The target model with its avatar</param>
-    /// <param name="targetBoneSuffix">The suffix on the name of targetModels bone heirachy</param>
     /// <returns>Returns false if it fails to swap models</returns>
-    public static bool SwapModel(ModelInfo avatar, ModelInfo targetModel, string targetBoneSuffix = "")
+    public static bool SwapModel(ModelInfo avatar, ModelInfo targetModel)
     {
         if (!avatar.IsValid || avatar.RootBone == null || !targetModel.IsValid)
             return false;
@@ -23,7 +22,6 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
         //If we have nothing to copy, don't do anything
         if (targetRenderer.Length == 0)
             return false;
-
         //We can re-use some of the avatarRenderers
         if (targetRenderer.Length < avatarRenderer.Count)
         {   //Delete the un-necessary renderers
@@ -76,8 +74,9 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
             for (int bone = 0; bone < tBones.Length; bone++)
             {   //Get the name without the suffix
                 name = tBones[bone].name;
-                if (name.StartsWith(targetBoneSuffix))
-                    name = name.Remove(0, targetBoneSuffix.Length);
+                int index = name.IndexOf(':');
+                if (index != -1)
+                    name = name.Remove(0, index + 1);
                 //Loop over all transforms the player has and check if they are valid.
                 foreach (Transform t in avatar.RootBone.GetComponentsInChildren<Transform>())
                 {
@@ -111,8 +110,9 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
             foreach(SkeletonBone t in h.skeleton)
             {
                 name = t.name;
-                if (name.StartsWith(targetBoneSuffix))
-                    name = name.Remove(0, targetBoneSuffix.Length);
+                int index = name.IndexOf(':');
+                if (index != -1)
+                    name = name.Remove(0, index + 1);
 
                 if (a.name == name)
                 {
