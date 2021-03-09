@@ -264,13 +264,15 @@ public class Player : MonoBehaviour
     private void Start()
     {
         player = this;
-        //Set the player to be moving forwards
-        _move = Vector3.forward * _runSpeed;
-        _a.SetFloat("Forwards", 1);
 #if DEBUG
+        //Load the players model
         if (avatar != null && rootBone != null && modelToSwapTo != null)
             SkinnedMeshBoneRebinder.SwapModel(avatar, rootBone, modelToSwapTo, "mixamorig:");
 #endif
+        //Set the player to be moving forwards
+        _move = Vector3.forward * _runSpeed;
+        _a.SetFloat("Forwards", 1);
+
         Reset();
     }
     /// <summary>
@@ -476,6 +478,8 @@ public class Player : MonoBehaviour
         _cc.ResetRotation();
         //Reset the move vector
         _move = Vector3.forward * _runSpeed;
+        //Just a backup check to ensure the player is playing the running animation
+        _a.SetFloat("Forwards", 1);
         //Reset the score
         _score = 0;
         //Set the starting lane for the player

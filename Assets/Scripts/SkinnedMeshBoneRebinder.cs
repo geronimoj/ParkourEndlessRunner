@@ -105,70 +105,46 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
             avatarRenderer[rend].bones = aBones;
         }
 
-        Avatar av = avatar.GetComponentInChildren<Animator>().avatar;
-        HumanDescription h = av.humanDescription;
-        //Loop over and fix the names of all the bones
-        for (int i = 0; i < h.human.Length; i++)
+        Avatar av;
+        HumanDescription h = targetModel.GetComponentInChildren<Animator>().avatar.humanDescription;
+        HumanDescription aH = avatar.GetComponentInChildren<Animator>().avatar.humanDescription;
+        //Loop over the human bone avatar description
+        //And set to use default values to avoid having to copy over other stuff to make things easier
+        for (int i = 0; i < aH.human.Length; i++)
         {
-            HumanBone hb = h.human[i];
-
-            if (hb.boneName.StartsWith(targetBoneSuffix))
-                hb.boneName = hb.boneName.Remove(0, targetBoneSuffix.Length);
-
-            if (hb.boneName.Contains("Ch24_nonPBR(Clone)"))
-                Debug.LogError("Found it");
-
-            if (hb.humanName.Contains("Ch24_nonPBR(Clone)"))
-                Debug.LogError("Found it");
-
-            h.human[i] = hb;
+            aH.human[i].limit.useDefaultValues = true;
         }
-        List<SkeletonBone> skBs = new List<SkeletonBone>();
-        //h.skeleton[0].name = rootBone.parent.name;
-        ////Repeat for skeleton
+        //Loop over the skeleton bones and compare identical bones, copying the values over
+        List<SkeletonBone> aSkBones = new List<SkeletonBone>(aH.skeleton);
 
-        foreach(Transform t in rootBone.parent.GetComponentsInChildren<Transform>())
+        for (int skBone = 0; skBone < aSkBones.Count; skBone++)
         {
-            SkeletonBone sb;
-            sb.name = t.name;
-            sb.position = t.localPosition;
-            sb.scale = t.localScale;
-            sb.rotation = t.localRotation;
-            if (sb.name.Contains("Ch24_nonPBR(Clone)"))
-                Debug.LogError("Found it");
-            if (sb.name.Contains("Hips"))
-                break;
-            skBs.Add(sb);
-        }
-        bool foundStart = false;
-        //Loop over the skeleton bones and only add the ones that weren't already added.
-        for (int i = 0; i < h.skeleton.Length; i++)
-        {
-            SkeletonBone sb = h.skeleton[i];
+            SkeletonBone a = aSkBones[skBone];
 
-            if (!foundStart && !sb.name.Contains("Hips"))
-                continue;
-            else if (!foundStart && sb.name.Contains("Hips"))
-                foundStart = true;
+            foreach(SkeletonBone t in h.skeleton)
+            {
+                name = t.name;
+                if (name.StartsWith(targetBoneSuffix))
+                    name = name.Remove(0, targetBoneSuffix.Length);
 
-            if (sb.name.StartsWith(targetBoneSuffix))
-                sb.name = sb.name.Remove(0, targetBoneSuffix.Length);
-            if (sb.name.Contains("Ch24_nonPBR(Clone)"))
-                Debug.LogError("Found it");
+                if (a.name == name)
+                {
+                    a.position = t.position;
+                    a.rotation = t.rotation;
+                    a.scale = t.scale;
+                    break;
+                }
+            }
 
-            skBs.Add(sb);
+            aSkBones[skBone] = a;
         }
-        {
-            SkeletonBone sb;
-            sb.name = "Neck1";
-            sb.position = Vector3.zero;
-            sb.scale = new Vector3(1, 1, 1);
-            sb.rotation = Quaternion.identity;
-            if (sb.name.Contains("Ch24_nonPBR(Clone)"))
-                Debug.LogError("Found it");
-            skBs.Add(sb);
-        }
-        h.skeleton = skBs.ToArray();
+        aH.skeleton = aSkBones.ToArray();
+        //Ensure the names are the same. Because of heirachy issues, we need to set the rootBones parents name simply because we can't change the parent naming heirachy in SkeletonBone struct
+        rootBone.parent.name = aH.skeleton[0].name;
+        //Now that we have fixed up the human bones and skeleton bones we copy those two arrays into h specifically
+        h.human = aH.human;
+        h.skeleton = aH.skeleton;
+
 
         av = AvatarBuilder.BuildHumanAvatar(rootBone.parent.gameObject, h);
         if (av.isValid)
