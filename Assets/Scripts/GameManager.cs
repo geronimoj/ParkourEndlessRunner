@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(LevelGenerator))]
-public class GameManager : MonoBehaviour
+public class GameManager : Manager
 {
     LevelGenerator m_lg = null;
 
@@ -15,8 +15,6 @@ public class GameManager : MonoBehaviour
     public GameObject m_pauseMenu = null;
 
     public GameObject m_deadText = null;
-
-    private bool _rebindingInput = false;
 
     private void Awake()
     {
@@ -52,10 +50,5 @@ public class GameManager : MonoBehaviour
 
             m_pauseMenu.SetActive(!m_pauseMenu.activeSelf);
         }
-    }
-
-    public void RebindingInput()
-    {
-        _rebindingInput = true;
     }
 }

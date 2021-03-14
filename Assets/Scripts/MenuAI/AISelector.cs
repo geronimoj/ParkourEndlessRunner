@@ -48,4 +48,13 @@ public class AISelector : MonoBehaviour
             transform.position -= _spawnOffset;
         }
     }
+    /// <summary>
+    /// Hook the ModelInfo up to the model info of a prefab. 
+    /// This is used after instantiation of a model to keep reference to prefab for when the model is deleted to avoid null variables being set
+    /// </summary>
+    /// <param name="prefab">The prefab containing the ModelInfo on a AISelector gameObject</param>
+    public void SetModelInfoToPrefab(GameObject prefab)
+    {
+        m_modelInfo = prefab.GetComponentInChildren<AISelector>().ModelInfo;
+    }
 }

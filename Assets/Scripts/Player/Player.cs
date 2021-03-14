@@ -9,12 +9,12 @@ public class Player : MonoBehaviour
     /// <summary>
     /// The Input Key used for sliding and rolling
     /// </summary>
-    private KeyCode _slideKey = KeyCode.LeftShift;
+    private static KeyCode _slideKey = KeyCode.LeftShift;
     /// <summary>
     /// The Input Key used for sliding and rolling.
     /// Cannot be Escape or Return
     /// </summary>
-    public KeyCode SlideKey
+    public static KeyCode SlideKey
     {
         get => _slideKey;
         set
@@ -26,12 +26,12 @@ public class Player : MonoBehaviour
     /// <summary>
     /// The Input Key used for jumping and vaulting
     /// </summary>
-    private KeyCode _jumpKey = KeyCode.Space;
+    private static KeyCode _jumpKey = KeyCode.Space;
     /// <summary>
     /// The Input Key used for jumping and vaulting
     /// Cannot be Escape or Return
     /// </summary>
-    public KeyCode JumpKey
+    public static KeyCode JumpKey
     {
         get => _jumpKey;
         set
@@ -43,12 +43,12 @@ public class Player : MonoBehaviour
     /// <summary>
     /// The Input Key used for doding left
     /// </summary>
-    private KeyCode _dodgeLeftKey = KeyCode.A;
+    private static KeyCode _dodgeLeftKey = KeyCode.A;
     /// <summary>
     /// The Input Key used for dodging left
     /// Cannot be Escape or Return
     /// </summary>
-    public KeyCode DodgeLeftKey
+    public static KeyCode DodgeLeftKey
     {
         get => _dodgeLeftKey; 
         set
@@ -60,12 +60,12 @@ public class Player : MonoBehaviour
     /// <summary>
     /// The Input Key used for doding right
     /// </summary>
-    private KeyCode _dodgeRightKey = KeyCode.D;
+    private static KeyCode _dodgeRightKey = KeyCode.D;
     /// <summary>
     /// The Input Key used for doding right
     /// Cannot be Escape or Return
     /// </summary>
-    public KeyCode DodgeRightKey
+    public static KeyCode DodgeRightKey
     {
         get => _dodgeRightKey;
         set
@@ -80,10 +80,21 @@ public class Player : MonoBehaviour
     /// </summary>
     /// <param name="key">The key to check</param>
     /// <returns>Returns true if key is Escape or Return</returns>
-    private bool InvalidKeyCode(KeyCode key)
+    private static bool InvalidKeyCode(KeyCode key)
     {
-        if (key == KeyCode.Escape || key == KeyCode.Return)
-            return true;
+        switch(key)
+        {
+            case KeyCode.Escape:
+            case KeyCode.Return:
+            case KeyCode.Mouse0:
+            case KeyCode.Mouse1:
+            case KeyCode.Mouse2:
+            case KeyCode.Mouse3:
+            case KeyCode.Mouse4:
+            case KeyCode.Mouse5:
+            case KeyCode.Mouse6:
+                return true;
+        }
         return false;
     }
     #endregion
@@ -250,7 +261,7 @@ public class Player : MonoBehaviour
     /// The model that should be swapped to. Root bone is not necessary
     /// </summary>
     [Tooltip("The model that should be swapped to when calling SwapModel")]
-    public ModelInfo modelToSwapTo = new ModelInfo();
+    public static ModelInfo modelToSwapTo = new ModelInfo();
     /// <summary>
     /// Gets references to components
     /// </summary>

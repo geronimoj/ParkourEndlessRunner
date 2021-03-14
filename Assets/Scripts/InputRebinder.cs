@@ -10,16 +10,16 @@ public class InputRebinder : MonoBehaviour
 
     public KeyToRebind keyRebind = KeyToRebind.Jump;
 
-    GameManager _gm = null;
+    Manager _m = null;
 
     Text _inputText = null;
 
     private void Awake()
     {
-        GameObject gm = GameObject.FindGameObjectWithTag("GameManager");
-        if (gm == null)
+        GameObject manager = GameObject.FindGameObjectWithTag("GameManager");
+        if (manager == null)
             Debug.LogError("Cannot find Game manager. Missing tag or does not exist");
-        _gm = gm.GetComponent<GameManager>();
+        _m = manager.GetComponent<Manager>();
         _inputText = GetComponentInChildren<Text>();
     }
 
@@ -28,16 +28,16 @@ public class InputRebinder : MonoBehaviour
         switch (keyRebind)
         {
             case KeyToRebind.Jump:
-                _inputText.text = "Jump Key: " + KeyCode.Space;
+                _inputText.text = "Jump Key: " + Player.JumpKey;
                 break;
             case KeyToRebind.Slide:
-                _inputText.text = "Slide Key: " + KeyCode.LeftShift;
+                _inputText.text = "Slide Key: " + Player.SlideKey;
                 break;
             case KeyToRebind.DodgeL:
-                _inputText.text = "Dodge Left Key: " + KeyCode.A;
+                _inputText.text = "Dodge Left Key: " + Player.DodgeLeftKey;
                 break;
             case KeyToRebind.DodgeR:
-                _inputText.text = "Dodge Right Key: " + KeyCode.D;
+                _inputText.text = "Dodge Right Key: " + Player.DodgeRightKey;
                 break;
         }
     }
@@ -57,20 +57,20 @@ public class InputRebinder : MonoBehaviour
                         switch (keyRebind)
                         {
                             case KeyToRebind.Jump:
-                                Player.player.JumpKey = key;
-                                _inputText.text = "Jump Key: " + Player.player.JumpKey;
+                                Player.JumpKey = key;
+                                _inputText.text = "Jump Key: " + Player.JumpKey;
                                 break;
                             case KeyToRebind.Slide:
-                                Player.player.SlideKey = key;
-                                _inputText.text = "Slide Key: " + Player.player.SlideKey;
+                                Player.SlideKey = key;
+                                _inputText.text = "Slide Key: " + Player.SlideKey;
                                 break;
                             case KeyToRebind.DodgeL:
-                                Player.player.DodgeLeftKey = key;
-                                _inputText.text = "Dodge Left Key: " + Player.player.DodgeLeftKey;
+                                Player.DodgeLeftKey = key;
+                                _inputText.text = "Dodge Left Key: " + Player.DodgeLeftKey;
                                 break;
                             case KeyToRebind.DodgeR:
-                                Player.player.DodgeRightKey = key;
-                                _inputText.text = "Dodge Right Key: " + Player.player.DodgeRightKey;
+                                Player.DodgeRightKey = key;
+                                _inputText.text = "Dodge Right Key: " + Player.DodgeRightKey;
                                 break;
                         }
                     }
@@ -80,8 +80,8 @@ public class InputRebinder : MonoBehaviour
     public void RebindKey()
     {
         waitForInput = true;
-        if (_gm != null)
-            _gm.RebindingInput();
+        if (_m != null)
+            _m.RebindingInput();
         //Its the switch statement again but this time, we are going to update it to say its nothing
         //Thus telling the player its waiting for at least an input
         switch (keyRebind)
