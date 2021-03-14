@@ -8,6 +8,7 @@ TagManager:
   - Ramp
   - Vaultable
   - ScoreText
+  - Model
   layers:
   - Default
   - TransparentFX
