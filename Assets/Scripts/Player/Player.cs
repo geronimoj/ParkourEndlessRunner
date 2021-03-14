@@ -516,7 +516,6 @@ public class Player : MonoBehaviour
     {
         //Load the players model
         SkinnedMeshBoneRebinder.SwapModel(defaultModelInfo, modelToSwapTo);
-        modelToSwapTo.Clear();
     }
     /// <summary>
     /// Determines if a given vector3 is pointing in the same direction as another

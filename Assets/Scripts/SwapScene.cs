@@ -12,6 +12,8 @@ public class SwapScene : MonoBehaviour
     public void Swap(string sceneName)
     {
         SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+        //When a scene is swapped, reset time scale just in case
+        Time.timeScale = 1;
     }
     /// <summary>
     /// Loads a scene without deleting the previous scene

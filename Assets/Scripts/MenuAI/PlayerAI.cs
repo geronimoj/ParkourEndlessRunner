@@ -18,6 +18,15 @@ public class PlayerAI : MonoBehaviour
     /// </summary>
     private GameObject currentModel = null;
     /// <summary>
+    /// Immediately swaps the model
+    /// </summary>
+    private void Start()
+    {   //Swap the models
+        SkinnedMeshBoneRebinder.SwapModel(defaultModel, Player.modelToSwapTo);
+        //Store the swapped model
+        currentModel = Player.modelToSwapTo.Model;
+    }
+    /// <summary>
     /// Swaps the players model if they are not equal
     /// </summary>
     void Update()

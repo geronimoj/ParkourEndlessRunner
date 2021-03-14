@@ -12,9 +12,14 @@ public class GameManager : Manager
 
     Text m_score = null;
 
-    public GameObject m_pauseMenu = null;
+    [SerializeField]
+    private GameObject m_pauseMenu = null;
 
-    public GameObject m_deadText = null;
+    [SerializeField]
+    private GameObject m_deadText = null;
+
+    [SerializeField]
+    private GameObject m_menuButton = null;
 
     private void Awake()
     {
@@ -23,6 +28,7 @@ public class GameManager : Manager
         m_score = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<Text>();
 
         m_pauseMenu.SetActive(false);
+        m_menuButton.SetActive(false);
     }
 
     void Update()
@@ -49,6 +55,7 @@ public class GameManager : Manager
             Time.timeScale = Time.timeScale == 0 ? 1 : 0;
 
             m_pauseMenu.SetActive(!m_pauseMenu.activeSelf);
+            m_menuButton.SetActive(!m_menuButton.activeSelf);
         }
     }
 }
