@@ -34,7 +34,8 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
         }    
         else if (targetRenderer.Length > avatarRenderer.Count)
         {   //We need to create more renderers
-            for (int i = 0; i < targetRenderer.Length - avatarRenderer.Count; i++)
+            int count = avatarRenderer.Count;
+            for (int i = 0; i < targetRenderer.Length - count; i++)
             {   //Create an empty game object
                 GameObject obj = Instantiate(new GameObject(), avatarRenderer[0].transform.parent);
                 //Add the skinned mesh renderer and put it in the avatars renderers

@@ -6,7 +6,17 @@ ModelImporter:
   - first:
       74: -203655887218126122
     second: mixamo.com
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Alpha_Body_MAT
+    second: {fileID: 2100000, guid: 372a572b22bc2134293e5113fd76a552, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Alpha_Joints_MAT
+    second: {fileID: 2100000, guid: c561318560afd5248b2330b37695067b, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
