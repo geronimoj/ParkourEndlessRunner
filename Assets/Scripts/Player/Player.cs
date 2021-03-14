@@ -250,7 +250,7 @@ public class Player : MonoBehaviour
     /// The model that should be swapped to. Root bone is not necessary
     /// </summary>
     [Tooltip("The model that should be swapped to when calling SwapModel")]
-    public static ModelInfo modelToSwapTo = new ModelInfo();
+    public ModelInfo modelToSwapTo = new ModelInfo();
     /// <summary>
     /// Gets references to components
     /// </summary>
@@ -269,7 +269,7 @@ public class Player : MonoBehaviour
     {
         player = this;
         //Clear the models so we don't swap to the same model again
-        modelToSwapTo.Clear();
+        SwapModel();
         //Reset the players position
         ResetPlayer();
     }
@@ -504,7 +504,7 @@ public class Player : MonoBehaviour
     public void SwapModel()
     {
         //Load the players model
-        SkinnedMeshBoneRebinder.SwapModel(defaultModelInfo, modelToSwapTo, "mixamorig:");
+        SkinnedMeshBoneRebinder.SwapModel(defaultModelInfo, modelToSwapTo);
         modelToSwapTo.Clear();
     }
     /// <summary>
