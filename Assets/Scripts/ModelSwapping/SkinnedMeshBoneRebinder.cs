@@ -10,8 +10,9 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
     /// </summary>
     /// <param name="avatar">Contains the default avatar, reference to the players rootbone and reference to the players models</param>
     /// <param name="targetModel">The target model with its avatar</param>
+    /// <param name="toIgnore">An array of skinned mesh renderers to ignore on avatar aka the player</param>
     /// <returns>Returns false if it fails to swap models</returns>
-    public static bool SwapModel(ModelInfo avatar, ModelInfo targetModel)
+    public static bool SwapModel(ModelInfo avatar, ModelInfo targetModel, SkinnedMeshRenderer[] toIgnore = null)
     {
         if (!avatar.IsValid || avatar.RootBone == null || !targetModel.IsValid)
             return false;
@@ -19,6 +20,14 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
         SkinnedMeshRenderer[] targetRenderer = targetModel.Model.GetComponentsInChildren<SkinnedMeshRenderer>();
         //We get the avatars models which we use to know where to store the new mesh renderers and which skinnedMeshRenderers to delete
         List<SkinnedMeshRenderer> avatarRenderer = new List<SkinnedMeshRenderer>(avatar.Model.GetComponentsInChildren<SkinnedMeshRenderer>());
+        //If we have skinnedmesh renderers to ignore, loop over them and remove them from the avatarRenderer
+        if (toIgnore != null)
+            //Loop over them 
+            foreach (SkinnedMeshRenderer mesh in toIgnore)
+                //If avatarRenderer contains these meshs, remove them
+                if (avatarRenderer.Contains(mesh))
+                    avatarRenderer.Remove(mesh);
+
         //If we have nothing to copy, don't do anything
         if (targetRenderer.Length == 0)
             return false;

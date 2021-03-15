@@ -513,9 +513,20 @@ public class Player : MonoBehaviour
     /// </summary>
     [ContextMenu("Swap Model")]
     public void SwapModel()
-    {
-        //Load the players model
-        SkinnedMeshBoneRebinder.SwapModel(defaultModelInfo, modelToSwapTo);
+    {   //Get all the skinned mesh renderer components
+        SkinnedMeshRenderer[] smr = new SkinnedMeshRenderer[1];
+        //Inefficient but it works. 
+        //Loop over every transform child we have and check if they are the cape. Once we find it, break.
+        //Since this is only done in load time, its kinda ok. This avoids issues of the cape not being assigned and having to allocate extra memory for something
+        //That will only ever be used in load time, aka once.
+        foreach(Transform t in GetComponentsInChildren<Transform>())
+            if(t.name == "Cape")
+            {   //Store the SkinnedMeshRenderer so the Swap Model ignores it
+                smr[0] = t.GetComponent<SkinnedMeshRenderer>();
+                break;
+            }
+        //Swap the player models
+        SkinnedMeshBoneRebinder.SwapModel(defaultModelInfo, modelToSwapTo, smr);
     }
     /// <summary>
     /// Determines if a given vector3 is pointing in the same direction as another
