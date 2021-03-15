@@ -84,6 +84,7 @@ MonoBehaviour:
   _jumpVelocity: 5
   _laneSwapTime: 0.2
   _rollReactionTime: 0.3
+  _coyoteTime: 0.1
   _fallKillVelocity: 7
   _vaultRange: 4
   _baseScoreMultiplier: 100
@@ -731,8 +732,8 @@ SkinnedMeshRenderer:
   m_BlendShapeWeights: []
   m_RootBone: {fileID: 0}
   m_AABB:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0.14999999, y: 2.9531948e-15, z: 0.5}
+    m_Center: {x: -0.00059720874, y: -0.086306155, z: 0.03186524}
+    m_Extent: {x: 0.15690264, y: 0.08627665, z: 0.4681281}
   m_DirtyAABB: 0
 --- !u!183 &6579274250751468406
 Cloth:
@@ -1279,6 +1280,33 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!136 &2937165388945410773
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7277133226332187068}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.15
+  m_Height: 0.51
+  m_Direction: 0
+  m_Center: {x: 0, y: 0.02, z: 0}
+--- !u!135 &7770673298262951705
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7277133226332187068}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.13
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &8245339122654982213
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1337,33 +1365,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!136 &2937165388945410773
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7277133226332187068}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.15
-  m_Height: 0.51
-  m_Direction: 0
-  m_Center: {x: 0, y: 0.02, z: 0}
---- !u!135 &7770673298262951705
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7277133226332187068}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.13
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &1582131109105456315
 Rigidbody:
   m_ObjectHideFlags: 0

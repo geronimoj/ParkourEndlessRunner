@@ -187,6 +187,16 @@ public class Player : MonoBehaviour
     /// </summary>
     private float t_rollTimer = 0;
     /// <summary>
+    /// The duration in which the player will float and be considered on the ground after stepping off a ledge
+    /// </summary>
+    [Tooltip("The duration in which the player will float and be considered on the ground after stepping off a ledge")]
+    [SerializeField]
+    private float _coyoteTime = 0;
+    /// <summary>
+    /// The timer for coyoteTime
+    /// </summary>
+    private float t_coyoteTimer = 0;
+    /// <summary>
     /// The minimum vertical speed of the player required to kill the player from falling given the player does not roll
     /// </summary>
     [Tooltip("The minimum vertical speed of the player required to kill the player from falling given the player does not roll")]
@@ -248,6 +258,14 @@ public class Player : MonoBehaviour
         set => _score = value; 
     }
     /// <summary>
+    /// Stores if the player is jumping
+    /// </summary>
+    private bool jumping = false;
+    /// <summary>
+    /// The gravity the player accumulates over coyoteTime
+    /// </summary>
+    private float trueGravity = 0;
+    /// <summary>
     /// Returns true if the player is dead
     /// </summary>
     public bool IsDead => _r.RagdollOn;
@@ -293,13 +311,34 @@ public class Player : MonoBehaviour
         float fallingSpeed = _move.y;
         //Apply gravity
         if (!_pc.OnGround)
-            _move += Physics.gravity * Time.fixedDeltaTime;
+        {   //If we started falling this frame, begin counting down the coyote timer
+            if (fallingSpeed == 0)
+            {
+                t_coyoteTimer += Time.deltaTime;
+                //Store the accumulated gravity that we skipped out on
+                //This is done to remove floatyness that coyote time brings
+                trueGravity += (Physics.gravity * Time.fixedDeltaTime).magnitude;
+            }
+            //If the coyoteTimer has finished or if we are not on the ground due to a jump, apply gravity
+            if (jumping || t_coyoteTimer > _coyoteTime)
+            {   //Apply the gravity that would have been accumulated over coyote time
+                _move += trueGravity * Physics.gravity.normalized;
+                //Set the gravity accumulated to 0 so that subsequent applications apply nothing
+                trueGravity = 0;
+                _move += Physics.gravity * Time.fixedDeltaTime;
+            }
+        }
         else
+        {   //Keep coyote timer at zero
+            t_coyoteTimer = 0;
+            //And make sure we are not moving down
             _move.y = 0;
+            jumping = false;
+        }
         //Continue performing lane changes
         ChangeLane();
         //Perform any parkour moves necessary
-        ParkourMove();
+        ParkourMove(!(jumping || t_coyoteTimer > _coyoteTime));
         //Move the player and check if they have died
         Move(fallingSpeed);
     }
@@ -388,9 +427,10 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Checks and performs a parkour move if possible
     /// </summary>
-    private void ParkourMove()
+    /// <param name="onGround">Wether the player is on the ground/in coyote time</param>
+    private void ParkourMove(bool onGround)
     {   //Jump or Vault
-        if (_pc.OnGround && !m_inAnimation && _jump)
+        if (onGround && !m_inAnimation && _jump)
         {
             //Perform a raycast forwards to see if we detect a vaultable object
             if (Physics.Raycast(_pc.colInfo.GetLowerPoint(), Vector3.forward, out RaycastHit hit, _pc.colInfo.TrueRadius + _vaultRange)
@@ -402,15 +442,18 @@ public class Player : MonoBehaviour
                 _a.SetTrigger("Vault");
             }
             else
+            {
                 //Otherwise, do a jump
                 _move.y = _jumpVelocity;
+                jumping = true;
+            }
         }
 
         //Slide or Roll
         if (!m_inAnimation && _slide)
         {
             //Slide but only if we aren't planning on rolling
-            if (_pc.OnGround && !_doRoll)
+            if (onGround && !_doRoll)
             {
                 //Set the camera to ignore the Y rotation of the players head for the sake of mkaing things look good
                 _cc.IgnoreYAxisOnHeadFollow = true;
@@ -423,7 +466,7 @@ public class Player : MonoBehaviour
             }
         }
         //If we have met the roll conditions, do the roll
-        if (_doRoll && _pc.OnGround && t_rollTimer <= _rollReactionTime)
+        if (_doRoll && onGround && t_rollTimer <= _rollReactionTime)
         {
             _doRoll = false;
             _a.SetTrigger("Roll");
