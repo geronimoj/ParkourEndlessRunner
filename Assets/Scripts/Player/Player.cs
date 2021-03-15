@@ -376,8 +376,17 @@ public class Player : MonoBehaviour
             && !InToleraceNorm(hit.normal, Vector3.up, 0.01f)
             //If the player does not roll
             || _pc.OnGround && Mathf.Abs(fallingSpeed) > Mathf.Abs(_fallKillVelocity) && t_rollTimer > _rollReactionTime)
-        {
-            doRagdoll = true;
+        {   //If the collision was on a left or right wall, rather than killing the player, move them back into their original lane
+            //Reguardless as to whether the player swaps lanes or dies, move's x component should probably be 0
+            _move.x = 0;
+            //Repeat for lane swap timer, same reasons, you either die or swap lanes 
+            t_laneSwapTimer = 0;
+            if (InToleraceNorm(hit.normal, Vector3.right, 0.01f))
+                _lane++;
+            else if (InToleraceNorm(hit.normal, -Vector3.right, 0.01f))
+                _lane--;
+            else
+                doRagdoll = true;
         }
 
         //If the player died, ragdoll them and don't move
