@@ -45,6 +45,10 @@ public class LevelGenerator : MonoBehaviour
     /// <summary>
     /// The number of lanes
     /// </summary>
+    private static uint numberOfLanes = 0;
+    /// <summary>
+    /// The number of lanes
+    /// </summary>
     public uint NumberOfLanes => m_numberOfLanes;
     /// <summary>
     /// The number of layers
@@ -52,6 +56,10 @@ public class LevelGenerator : MonoBehaviour
     [Tooltip("The number of layers")]
     [SerializeField]
     private uint m_numberOfLayers = 3;
+    /// <summary>
+    /// The number of layers
+    /// </summary>
+    private static uint numberOfLayers = 0;
     /// <summary>
     /// The number of layers
     /// </summary>
@@ -177,6 +185,12 @@ public class LevelGenerator : MonoBehaviour
         //Before them multiplying it back by tile length to convert it back into a distance
         m_distanceUntilLoop = (int)(m_distanceUntilLoop / m_tileLength) * m_tileLength;
         _player = GameObject.FindGameObjectWithTag("Player").transform;
+        //If the static values have been set, set our values to the static values.
+        //This is to help debugging if custom values want to be used when debugging
+        if (numberOfLanes != 0)
+            m_numberOfLanes = numberOfLanes;
+        if (numberOfLayers != 0)
+            m_numberOfLayers = numberOfLayers;
     }
     /// <summary>
     /// Generates a level upon starting the game
@@ -419,6 +433,16 @@ public class LevelGenerator : MonoBehaviour
             _frontTilePos = 0;
             _currentLength = m_tiles.Count / (int)m_numberOfLanes;
         }
+    }
+    /// <summary>
+    /// Set the levels size
+    /// </summary>
+    /// <param name="layers">Number of layers the level has</param>
+    /// <param name="lanes">Number of lanes the level has</param>
+    public static void SetLevelSize(uint layers, uint lanes)
+    {
+        numberOfLayers = layers;
+        numberOfLanes = lanes;
     }
 }
 /// <summary>

@@ -46,6 +46,10 @@ public class MainMenuManager : Manager
     [Tooltip("The UI that appears when swapping models")]
     [SerializeField]
     private GameObject _modelMenu = null;
+
+    [Tooltip("The UI that appears when selecting a level")]
+    [SerializeField]
+    private GameObject _levelMenu = null;
     /// <summary>
     /// Makes sure everything has been assigned correctly
     /// </summary>
@@ -59,6 +63,8 @@ public class MainMenuManager : Manager
         _modelMenu.SetActive(false);
         Debug.Assert(_tutorialMenu != null, "Tutorial Menu not assigned!");
         _tutorialMenu.SetActive(false);
+        Debug.Assert(_levelMenu != null, "Level Menu not assigned!");
+        _levelMenu.SetActive(false);
     }
     /// <summary>
     /// Spawns the player models
@@ -69,6 +75,7 @@ public class MainMenuManager : Manager
         //Dissable the other menus
         _tutorialMenu.SetActive(false);
         _rebindMenu.SetActive(false);
+        _levelMenu.SetActive(false);
         //Unload any player models that already exist
         UnloadPlayerModels();
         //Re-enable the model menu as UnloadPlayerModels set it to false
@@ -105,15 +112,32 @@ public class MainMenuManager : Manager
         //Make sure other menus are set to false
         UnloadPlayerModels();
         _tutorialMenu.SetActive(false);
+        _levelMenu.SetActive(false);
     }
-
+    /// <summary>
+    /// Toggles the tutorial menu
+    /// </summary>
     public void ToggleTutorial()
     {
         _tutorialMenu.SetActive(!_tutorialMenu.activeSelf);
         //Make sure other menaus are set to false
         UnloadPlayerModels();
         _rebindMenu.SetActive(false);
+        _levelMenu.SetActive(false);
     }
+
+    public void EnableLevel()
+    {
+        _levelMenu.SetActive(true);
+
+        UnloadPlayerModels();
+        _rebindMenu.SetActive(false);
+        _tutorialMenu.SetActive(false);
+    }
+
+    public void SetWorldDefault() => LevelGenerator.SetLevelSize(3, 3);
+
+    public void SetWorldBig() => LevelGenerator.SetLevelSize(5, 100);
     /// <summary>
     /// Exits the program
     /// </summary>
