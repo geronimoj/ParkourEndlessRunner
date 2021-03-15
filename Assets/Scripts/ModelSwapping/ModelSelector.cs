@@ -6,13 +6,20 @@
 [RequireComponent(typeof(Camera))]
 public class ModelSelector : MonoBehaviour
 {
+    /// <summary>
+    /// A reference to the camera
+    /// </summary>
     private Camera _camera;
-
+    /// <summary>
+    /// Gets the camera component
+    /// </summary>
     private void Awake()
     {
         _camera = GetComponent<Camera>();
     }
-
+    /// <summary>
+    /// Checks if the user clicked on a model and, if so, swaps too said model
+    /// </summary>
     private void Update()
     {   //If the player left clicks
         if (Input.GetMouseButtonDown(0)

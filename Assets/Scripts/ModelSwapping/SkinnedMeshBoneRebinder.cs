@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Contains static functions for swapping a model during run time of an animated avatar
+/// </summary>
 public class SkinnedMeshBoneRebinder : MonoBehaviour
 {
     /// <summary>
@@ -116,14 +118,14 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
         for (int skBone = 0; skBone < aSkBones.Count; skBone++)
         {
             SkeletonBone a = aSkBones[skBone];
-
+            //Loop over the bones of the target avatar
             foreach(SkeletonBone t in h.skeleton)
-            {
+            {   //Get the name without any prefix
                 name = t.name;
                 int index = name.IndexOf(':');
                 if (index != -1)
                     name = name.Remove(0, index + 1);
-
+                //If the names are identical, copy over the local transform of the object
                 if (a.name == name)
                 {
                     a.position = t.position;
@@ -132,7 +134,7 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
                     break;
                 }
             }
-
+            //Store the updated skeletonBone
             aSkBones[skBone] = a;
         }
         aH.skeleton = aSkBones.ToArray();
@@ -142,12 +144,12 @@ public class SkinnedMeshBoneRebinder : MonoBehaviour
         h.human = aH.human;
         h.skeleton = aH.skeleton;
 
-
+        //Generate the avatar
         Avatar av = AvatarBuilder.BuildHumanAvatar(avatar.Model.gameObject, h);
+        //Make sure its a valid avatar before assigning it
         if (av.isValid)
             avatar.Model.GetComponentInChildren<Animator>().avatar = av;
         
-
         return true;
     }
 }
