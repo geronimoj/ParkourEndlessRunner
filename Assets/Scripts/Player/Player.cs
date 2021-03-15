@@ -499,10 +499,7 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Lowers the players collider
     /// </summary>
-    public void EnterSlide()
-    {
-        _pc.colInfo.UpperHeight = 0;
-    }
+    public void EnterSlide() => _pc.colInfo.UpperHeight = 0;
     /// <summary>
     /// Returns the camera to normal for regular running
     /// </summary>
