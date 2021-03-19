@@ -314,7 +314,7 @@ public class Player : MonoBehaviour
         {   //If we started falling this frame, begin counting down the coyote timer
             if (fallingSpeed == 0)
             {
-                t_coyoteTimer += Time.deltaTime;
+                t_coyoteTimer += Time.fixedDeltaTime;
                 //Store the accumulated gravity that we skipped out on
                 //This is done to remove floatyness that coyote time brings
                 trueGravity += (Physics.gravity * Time.fixedDeltaTime).magnitude;
