@@ -733,8 +733,8 @@ SkinnedMeshRenderer:
   m_BlendShapeWeights: []
   m_RootBone: {fileID: 0}
   m_AABB:
-    m_Center: {x: -0.06244147, y: -0.60524356, z: 0.40393966}
-    m_Extent: {x: 0.18218975, y: 0.50914884, z: 0.047057092}
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0.14999999, y: 2.9531948e-15, z: 0.5}
   m_DirtyAABB: 0
 --- !u!183 &6579274250751468406
 Cloth:
@@ -1477,30 +1477,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 15723218886475979}
     m_Modifications:
-    - target: {fileID: 3521538745795983688, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
-      propertyPath: ShapeModule.radius.value
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3521538745795983688, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
-      propertyPath: ShapeModule.radiusThickness
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3521538745795983688, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
-      propertyPath: simulationSpeed
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 3521538745795983688, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
-      propertyPath: TrailModule.colorOverTrail.maxColor.a
-      value: 0.11764706
-      objectReference: {fileID: 0}
-    - target: {fileID: 3521538745795983688, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
-      propertyPath: EmissionModule.rateOverTime.scalar
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 3521538745795983688, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
-      propertyPath: lengthInSec
-      value: 0.2
-      objectReference: {fileID: 0}
     - target: {fileID: 3521538745795983689, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1548,6 +1524,22 @@ PrefabInstance:
     - target: {fileID: 3521538745795983694, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
       propertyPath: m_Name
       value: Particle Effect
+      objectReference: {fileID: 0}
+    - target: {fileID: 3521538745795983695, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: cb4784341afa36d4797a4d9b22b8ba5c, type: 2}
+    - target: {fileID: 3521538745795983695, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
+      propertyPath: m_MinParticleSize
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3521538745795983695, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
+      propertyPath: m_MaxParticleSize
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3521538745795983695, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
+      propertyPath: m_SortMode
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 614049f6ab1ea2547aab9f431c7315d8, type: 3}
