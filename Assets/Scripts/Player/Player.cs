@@ -153,6 +153,10 @@ public class Player : MonoBehaviour
     /// A reference to the level generator to get and get only, a few variables
     /// </summary>
     private LevelGenerator _lg = null;
+    /// <summary>
+    /// A reference to the particle systems transform
+    /// </summary>
+    private Transform _particleTransform = null;
     #endregion
     /// <summary>
     /// Stores the players movement vector for smooth movement
@@ -290,6 +294,7 @@ public class Player : MonoBehaviour
         _cc = transform.GetChild(1).GetComponent<CameraController>();
         _pc = GetComponent<PlayerController>();
         _lg = GameObject.FindGameObjectWithTag("GameManager").GetComponent<LevelGenerator>();
+        _particleTransform = GetComponentInChildren<ParticleSystem>().transform;
     }
     /// <summary>
     /// Sets the static player reference to be this player. Sets the player to move forward and resets their position and variables
@@ -385,8 +390,13 @@ public class Player : MonoBehaviour
                 _lane++;
             else if (InToleraceNorm(hit.normal, -Vector3.right, 0.01f))
                 _lane--;
+            //We must be dead otherwise
             else
+            {
                 doRagdoll = true;
+                //Dissable the speed lines
+                _particleTransform.gameObject.SetActive(false);
+            }
         }
 
         //If the player died, ragdoll them and don't move
@@ -396,6 +406,12 @@ public class Player : MonoBehaviour
         else
         {
             _pc.MoveTo(_move * Time.fixedDeltaTime);
+            //We want to cut out the x component of the movement vector for the particles so it doesn't flick to
+            //the left or right when changing lanes, just up and down.
+            Vector3 moveVec = _move;
+            moveVec.x = 0;
+            //Rotate the particle system to fire particles in the direction of movement
+            _particleTransform.LookAt(_particleTransform.position - moveVec.normalized, Vector3.up);
             _score += _baseScoreMultiplier * Time.fixedDeltaTime;
         }
     }
@@ -530,6 +546,8 @@ public class Player : MonoBehaviour
     public void ResetPlayer()
     {   //Stop us from ragdolling
         _r.RagdollOn = false;
+        //Make sure the particles are enabled
+        _particleTransform.gameObject.SetActive(true);
         //Reset our animation
         _a.Play("Base Layer.Blend Tree", 0);
         //Reset the camera rotation
@@ -562,20 +580,9 @@ public class Player : MonoBehaviour
     /// </summary>
     [ContextMenu("Swap Model")]
     public void SwapModel()
-    {   //Get all the skinned mesh renderer components
-        SkinnedMeshRenderer[] smr = new SkinnedMeshRenderer[1];
-        //Inefficient but it works. 
-        //Loop over every transform child we have and check if they are the cape. Once we find it, break.
-        //Since this is only done in load time, its kinda ok. This avoids issues of the cape not being assigned and having to allocate extra memory for something
-        //That will only ever be used in load time, aka once.
-        foreach(Transform t in GetComponentsInChildren<Transform>())
-            if(t.name == "Cape")
-            {   //Store the SkinnedMeshRenderer so the Swap Model ignores it
-                smr[0] = t.GetComponent<SkinnedMeshRenderer>();
-                break;
-            }
+    {
         //Swap the player models
-        SkinnedMeshBoneRebinder.SwapModel(defaultModelInfo, modelToSwapTo, smr);
+        SkinnedMeshBoneRebinder.SwapModel(defaultModelInfo, modelToSwapTo, null);
     }
     /// <summary>
     /// Determines if a given vector3 is pointing in the same direction as another

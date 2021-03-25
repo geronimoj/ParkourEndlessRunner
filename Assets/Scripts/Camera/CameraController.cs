@@ -81,6 +81,13 @@ public class CameraController : MonoBehaviour
         get => _ignoreYAxisOnHeadFollow;
         set => _ignoreYAxisOnHeadFollow = value;
     }
+
+    [SerializeField]
+    private float _returnToNormal = 0.5f;
+
+    private float t_returnTime = 0;
+
+    private Vector3 _cameraRotationUponExit = Vector3.zero;
     /// <summary>
     /// Disables the players mouse cursor so they don't see it
     /// </summary>
@@ -140,6 +147,8 @@ public class CameraController : MonoBehaviour
             if (_ignoreYAxisOnHeadFollow)
                 angle.y = 0;
             transform.eulerAngles = angle;
+            t_returnTime = 0;
+            _cameraRotationUponExit = angle;
         }
 #if FREECAM
         else
@@ -147,6 +156,14 @@ public class CameraController : MonoBehaviour
             Vector3 ang = _neckTransform.eulerAngles;
             ang.x += headAngle.x;
             _neckTransform.eulerAngles = ang;
+        }
+#else
+        else
+        {
+            t_returnTime += Time.deltaTime;
+            Vector3 angle = transform.eulerAngles;
+            //angle = Vector3.Lerp(_cameraRotationUponExit, Vector3.zero, t_returnTime / _returnToNormal);
+            transform.eulerAngles = angle;
         }
 #endif
     }
