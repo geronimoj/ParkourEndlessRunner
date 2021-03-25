@@ -147,8 +147,8 @@ public class CameraController : MonoBehaviour
             if (_ignoreYAxisOnHeadFollow)
                 angle.y = 0;
             transform.eulerAngles = angle;
-            t_returnTime = 0;
-            _cameraRotationUponExit = angle;
+            //t_returnTime = 0;
+            //_cameraRotationUponExit = angle;
         }
 #if FREECAM
         else
