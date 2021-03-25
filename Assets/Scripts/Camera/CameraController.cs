@@ -82,12 +82,12 @@ public class CameraController : MonoBehaviour
         set => _ignoreYAxisOnHeadFollow = value;
     }
 
-    [SerializeField]
-    private float _returnToNormal = 0.5f;
+    //[SerializeField]
+    //private float _returnToNormal = 0.5f;
 
-    private float t_returnTime = 0;
+    //private float t_returnTime = 0;
 
-    private Vector3 _cameraRotationUponExit = Vector3.zero;
+    //private Vector3 _cameraRotationUponExit = Vector3.zero;
     /// <summary>
     /// Disables the players mouse cursor so they don't see it
     /// </summary>
@@ -158,13 +158,13 @@ public class CameraController : MonoBehaviour
             _neckTransform.eulerAngles = ang;
         }
 #else
-        else
-        {
-            t_returnTime += Time.deltaTime;
-            Vector3 angle = transform.eulerAngles;
-            //angle = Vector3.Lerp(_cameraRotationUponExit, Vector3.zero, t_returnTime / _returnToNormal);
-            transform.eulerAngles = angle;
-        }
+        //else
+        //{
+        //    t_returnTime += Time.deltaTime;
+        //    Vector3 angle = transform.eulerAngles;
+        //    angle = Vector3.Lerp(_cameraRotationUponExit, Vector3.zero, t_returnTime / _returnToNormal);
+        //    transform.eulerAngles = angle;
+        //}
 #endif
     }
     /// <summary>
