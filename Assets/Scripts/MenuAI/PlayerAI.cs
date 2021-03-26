@@ -5,6 +5,7 @@ using UnityEngine;
 /// The AI that is used to display the players model.
 /// </summary>
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(RenderHead))]
 public class PlayerAI : MonoBehaviour
 {
     /// <summary>
@@ -31,6 +32,8 @@ public class PlayerAI : MonoBehaviour
         SkinnedMeshBoneRebinder.SwapModel(defaultModel, Player.modelToSwapTo);
         //Store the swapped model
         currentModel = Player.modelToSwapTo.Model;
+
+        _rm.UpdateMaterial();
     }
     /// <summary>
     /// Swaps the players model if they are not equal
