@@ -416,8 +416,6 @@ public class LevelGenerator : MonoBehaviour
             Vector3 p = _player.position;
             p.z -= m_distanceUntilLoop;
             _player.position = p;
-
-            //player.position -= Vector3.forward * m_distanceUntilLoop;
             
             //Teleport the world
             for (int i = 0; i < m_tiles.Count; i++)
@@ -432,6 +430,8 @@ public class LevelGenerator : MonoBehaviour
             //Reset the length values so iterators remain valid and we don't generate 100 units in front of the level. That would be bad
             _frontTilePos = 0;
             _currentLength = m_tiles.Count / (int)m_numberOfLanes;
+
+            Physics.SyncTransforms();
         }
     }
     /// <summary>

@@ -39,8 +39,10 @@
         UNITY_INSTANCING_BUFFER_END(Props)
 
         void surf (Input IN, inout SurfaceOutputStandard o)
-        {
+        {   //Compare the colour values and make sure they are in range
             clip(tex2D(_HeadCut, IN.uv_MainTex).r - 0.1);
+            clip(tex2D(_HeadCut, IN.uv_MainTex).g - 0.1);
+            clip(tex2D(_HeadCut, IN.uv_MainTex).b - 0.1);
             // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;

@@ -245,10 +245,15 @@ public class PlayerController : MonoBehaviour
         //Combine the raycast results
         List<RaycastHit> total = new List<RaycastHit>();
         offsetIndex = 0;
+        int wInd = 0;
         for (int i = 0; i < regular.Length + withOffset.Length; i++)
         {
-            if (i >= regular.Length && !collidersToIgnore.Contains(withOffset[i - regular.Length].collider))
-                total.Add(withOffset[i - regular.Length]);
+            if (i >= regular.Length)
+            {
+                if (!collidersToIgnore.Contains(withOffset[wInd].collider))
+                    total.Add(withOffset[wInd]);
+                wInd++;
+            }
             else if (i < regular.Length && !collidersToIgnore.Contains(regular[i].collider))
             {
                 total.Add(regular[i]);
