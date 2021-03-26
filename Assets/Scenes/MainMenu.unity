@@ -2376,7 +2376,8 @@ MonoBehaviour:
   - {fileID: 8143210382681975060, guid: 90d9463e56593894a8040f8cd8f3aca0, type: 3}
   - {fileID: 1102066234063158370, guid: e9a749d127f7f8848a95c393d5a77939, type: 3}
   - {fileID: 4174149500951515492, guid: 95e12c614d3bd764abd7e9074a79ac92, type: 3}
-  _modelSpawnOffset: {x: -1.5, y: 0, z: 6}
+  - {fileID: 1575017634525026114, guid: b7bf1ddcdf4f86d4ea9a320ce34cafa0, type: 3}
+  _modelSpawnOffset: {x: 0, y: 0, z: 6}
   _modelSpacing: {x: -1, y: 0, z: 0}
   _rebindMenu: {fileID: 1519742974}
   _tutorialMenu: {fileID: 456199155}
@@ -5300,6 +5301,7 @@ GameObject:
   - component: {fileID: 6910321398264537149}
   - component: {fileID: 3561335147573939527}
   - component: {fileID: 7619313678323569199}
+  - component: {fileID: 7619313678323569200}
   m_Layer: 0
   m_Name: Beta
   m_TagString: Untagged
@@ -5323,6 +5325,18 @@ MonoBehaviour:
     _modelAvatar: {fileID: 9000000, guid: 2dc526a87c49416478b13f971cef333c, type: 3}
     _model: {fileID: 7619313678323569198}
     _rootBone: {fileID: 2783858960181395293}
+--- !u!114 &7619313678323569200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7619313678323569198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5625cf0a0b0a8aa44b8c9f500a357f74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7704432033120804847
 GameObject:
   m_ObjectHideFlags: 0

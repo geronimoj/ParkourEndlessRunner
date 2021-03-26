@@ -1234,6 +1234,7 @@ GameObject:
   - component: {fileID: 7225588697043521956}
   - component: {fileID: 4388379428929374256}
   - component: {fileID: 244452107389232816}
+  - component: {fileID: 3393420599765451516}
   m_Layer: 0
   m_Name: ybot
   m_TagString: Model
@@ -1307,6 +1308,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 2, z: 1}
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &3393420599765451516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4174149500951515492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5625cf0a0b0a8aa44b8c9f500a357f74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4191135561286103615
 GameObject:
   m_ObjectHideFlags: 0

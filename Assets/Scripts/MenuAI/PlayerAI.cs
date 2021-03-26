@@ -18,10 +18,16 @@ public class PlayerAI : MonoBehaviour
     /// </summary>
     private GameObject currentModel = null;
     /// <summary>
+    /// Get a reference to the head renderer to render the head
+    /// </summary>
+    private RenderHead _rm = null;
+    /// <summary>
     /// Immediately swaps the model
     /// </summary>
     private void Start()
-    {   //Swap the models
+    {
+        _rm = GetComponent<RenderHead>();
+        //Swap the models
         SkinnedMeshBoneRebinder.SwapModel(defaultModel, Player.modelToSwapTo);
         //Store the swapped model
         currentModel = Player.modelToSwapTo.Model;
@@ -36,6 +42,8 @@ public class PlayerAI : MonoBehaviour
             SkinnedMeshBoneRebinder.SwapModel(defaultModel, Player.modelToSwapTo);
             //Store the swapped model
             currentModel = Player.modelToSwapTo.Model;
+            //Update the material
+            _rm.UpdateMaterial();
         }
     }
 }
