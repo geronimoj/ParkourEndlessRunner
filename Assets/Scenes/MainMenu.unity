@@ -2377,7 +2377,8 @@ MonoBehaviour:
   - {fileID: 1102066234063158370, guid: e9a749d127f7f8848a95c393d5a77939, type: 3}
   - {fileID: 4174149500951515492, guid: 95e12c614d3bd764abd7e9074a79ac92, type: 3}
   - {fileID: 1575017634525026114, guid: b7bf1ddcdf4f86d4ea9a320ce34cafa0, type: 3}
-  _modelSpawnOffset: {x: 0, y: 0, z: 6}
+  - {fileID: 5273989078708229526, guid: c08245bf43c7aff4a9e072c3843dd97a, type: 3}
+  _modelSpawnOffset: {x: 1, y: 0, z: 6}
   _modelSpacing: {x: -1, y: 0, z: 0}
   _rebindMenu: {fileID: 1519742974}
   _tutorialMenu: {fileID: 456199155}
