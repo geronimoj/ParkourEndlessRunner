@@ -379,7 +379,7 @@ public class LevelGenerator : MonoBehaviour
     {   //Loop through the tiles
         for (int i = 0; i < m_tiles.Count; i++)
             //Loop through the objects on the tile
-            for (int objects = 0; objects < m_tiles[i].m_objectsOnTile.Length; objects++)
+            for (int objects = 0; objects < m_tiles[i].m_objectsOnTile.Count; objects++)
                 //Destroy the object
                 DestroyImmediate(m_tiles[i].m_objectsOnTile[objects]);
         m_tiles.Clear();
@@ -392,7 +392,7 @@ public class LevelGenerator : MonoBehaviour
     {
         for (int i = 0; i < tilesToDelete * m_numberOfLanes; i++)
         {   //Loop through the first tile and delete it. We don't use i because we then remove this tile from the list, making the next tile the first tile
-            for (int tileObj = 0; tileObj < m_tiles[0].m_objectsOnTile.Length; tileObj++)
+            for (int tileObj = 0; tileObj < m_tiles[0].m_objectsOnTile.Count; tileObj++)
                 Destroy(m_tiles[0].m_objectsOnTile[tileObj]);
             //Remove the front tile
             m_tiles.RemoveAt(0);
@@ -420,7 +420,7 @@ public class LevelGenerator : MonoBehaviour
             //Teleport the world
             for (int i = 0; i < m_tiles.Count; i++)
             {
-                for (int tileObj = 0; tileObj < m_tiles[i].m_objectsOnTile.Length; tileObj++)
+                for (int tileObj = 0; tileObj < m_tiles[i].m_objectsOnTile.Count; tileObj++)
                 {
                     p = m_tiles[i].m_objectsOnTile[tileObj].transform.position;
                     p.z -= m_distanceUntilLoop;
@@ -453,7 +453,7 @@ public struct TileInfo
 {   /// <summary>
     /// Stores the objects on this tile for ease of access for deleting
     /// </summary>
-    public GameObject[] m_objectsOnTile;
+    public List<GameObject> m_objectsOnTile;
     /// <summary>
     /// The lane this tile exists on
     /// </summary>
@@ -498,11 +498,6 @@ public struct TileInfo
         set
         {   //Adjust the size of the objects on this tile based on whether this tile needs to store a ramp
             _isRamp = value;
-            GameObject obstacle = m_objectsOnTile[m_objectsOnTile.Length - 1];
-            int length = _isRamp ? 2 : 1;
-            length += obstacle != null ? 1 : 0;
-            m_objectsOnTile = new GameObject[length];
-            m_objectsOnTile[length - 1] = obstacle;
         }
     }
     /// <summary>
@@ -515,8 +510,7 @@ public struct TileInfo
     /// <param name="isRamp">If this tile is a ramp</param>
     public void Initialise(uint lane, uint height, uint forwardPoint, bool isRamp)
     {   //Set the length of objects to store
-        int length = isRamp ? 2 : 1;
-        m_objectsOnTile = new GameObject[length];
+        m_objectsOnTile = new List<GameObject>();
         _lane = lane;
         _height = height;
         _forwardPoint = forwardPoint;
@@ -543,7 +537,7 @@ public struct TileInfo
         r.material.SetTextureScale("_WallTex", new Vector2(1, _isRamp ? _height : _height + 1));
         r.material.SetTextureScale("_MainTex", new Vector2(1, tileLength));
         //Store it
-        m_objectsOnTile[0] = obj;
+        m_objectsOnTile.Add(obj);
         //If we have a ramp, create it
         if (_isRamp)
         {
@@ -552,7 +546,7 @@ public struct TileInfo
             //Scale the ramp to fit the tile
             obj.transform.localScale = new Vector3(laneWidth, tileHeight, tileLength);
             //Store it
-            m_objectsOnTile[1] = obj;
+            m_objectsOnTile.Add(obj);
         }
     }
     /// <summary>
@@ -560,25 +554,17 @@ public struct TileInfo
     /// </summary>
     /// <param name="obstacle">The obstacle to create and add</param>
     public void AddObstacle(GameObject obstacle, float laneWidth, float tileHeight, float tileLength, Vector3 posOffset)
-    {   //Increase the length of objectsOnTiles to fit the obstacle
-        int length = _isRamp ? 2 : 1;
-        length += obstacle != null ? 1 : 0;
-        m_objectsOnTile = new GameObject[length];
-        //Spawn the obstacle
+    {   //Spawn the obstacle
         GameObject obj = GameObject.Instantiate(obstacle, new Vector3(laneWidth * _lane + posOffset.x, (_height + 0.5f) * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);
         //Store the object
-        m_objectsOnTile[length - 1] = obj;
+        m_objectsOnTile.Add(obj);
     }
     /// <summary>
     /// Stores an already existing obstacle on this tile
     /// </summary>
     /// <param name="obstacle">The obstacle to add</param>
     public void AddObstacle(ref GameObject obstacle)
-    {   //Increase the length of objectsOnTiles to fit the obstacle
-        int length = _isRamp ? 2 : 1;
-        length += obstacle != null ? 1 : 0;
-        m_objectsOnTile = new GameObject[length];
-        //Store the object
-        m_objectsOnTile[length - 1] = obstacle;
+    {   //Store the object
+        m_objectsOnTile.Add(obstacle);
     }
 }
