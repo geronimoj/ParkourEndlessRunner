@@ -124,6 +124,12 @@ public class Player : MonoBehaviour
     /// </summary>
     public float JumpVelocity => _jumpVelocity;
     /// <summary>
+    /// The height, from the lowest point of the player, that they can step over without dying
+    /// </summary>
+    [Tooltip("The height, from the lowest point of the player, that they can step over without dying")]
+    [SerializeField]
+    private float _stepHeight = 0.2f;
+    /// <summary>
     /// The current lane of the player, for position calculations
     /// </summary>
     private uint _lane = 1;
@@ -322,7 +328,7 @@ public class Player : MonoBehaviour
                 t_coyoteTimer += Time.fixedDeltaTime;
                 //Store the accumulated gravity that we skipped out on
                 //This is done to remove floatyness that coyote time brings
-                trueGravity += (Physics.gravity * Time.fixedDeltaTime).magnitude;
+                //trueGravity += (Physics.gravity * Time.fixedDeltaTime).magnitude;
             }
             //If the coyoteTimer has finished or if we are not on the ground due to a jump, apply gravity
             if (jumping || t_coyoteTimer > _coyoteTime)
@@ -379,6 +385,8 @@ public class Player : MonoBehaviour
             && (!hit.transform.CompareTag("Ramp") || (InToleraceNorm(hit.normal, Vector3.right, 0.01f) || InToleraceNorm(hit.normal, -Vector3.right, 0.01f))) 
             //Is the normal not pointing upwards, if its not, its not ground
             && !InToleraceNorm(hit.normal, Vector3.up, 0.01f)
+            //Check if we can step up this height, if we can't then its a collision we have to deal with
+            && hit.point.y - _pc.colInfo.GetLowestPoint().y > _stepHeight
             //If the player does not roll
             || _pc.OnGround && Mathf.Abs(fallingSpeed) > Mathf.Abs(_fallKillVelocity) && t_rollTimer > _rollReactionTime)
         {   //If the collision was on a left or right wall, rather than killing the player, move them back into their original lane

@@ -82,11 +82,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _runSpeed: 10
-  _jumpVelocity: 5
+  _jumpVelocity: 7
   _laneSwapTime: 0.2
   _rollReactionTime: 0.3
   _coyoteTime: 0.1
-  _fallKillVelocity: 7
+  _fallKillVelocity: 10
   _vaultRange: 4
   _baseScoreMultiplier: 100
   defaultModelInfo:
