@@ -4,6 +4,7 @@
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
+        _WallTex ("Wall Texture", 2D) = "white" {}
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
         _DropEnd("Drop Begin Distance", Float) = 0.0
@@ -21,10 +22,13 @@
         #pragma target 3.0
 
         sampler2D _MainTex;
+        sampler2D _WallTex;
 
         struct Input
         {
             float2 uv_MainTex;
+            float2 uv_WallTex;
+            float3 vertexNormal;
         };
 
         half _Glossiness;
@@ -32,8 +36,11 @@
         fixed4 _Color;
         float _DropEnd;
 
-        void vert(inout appdata_full v)
-        {   //Gets the world position of the vertex
+        void vert(inout appdata_full v, out Input o)
+        {   
+            UNITY_INITIALIZE_OUTPUT(Input, o);
+            o.vertexNormal = v.normal;
+            //Gets the world position of the vertex
             float3 worldPos = mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1.0)).xyz;
             //Gets the distance to that point
             float dist = distance(worldPos, _WorldSpaceCameraPos);
@@ -53,9 +60,11 @@
         UNITY_INSTANCING_BUFFER_END(Props)
 
         void surf (Input IN, inout SurfaceOutputStandard o)
-        {
+        {   //Get the dot onto the forward and right vector of the normal. This is used to determine if a surface is pointing upwards, aka, floor or wall
+            //The value is made positive to reduce the number of checks
+            float d = abs(dot(IN.vertexNormal, float3(1, 0, 1)));
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            fixed4 c = d >= 0.9 ? tex2D(_WallTex, IN.uv_WallTex) * _Color : tex2D(_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
