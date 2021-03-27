@@ -532,7 +532,7 @@ public struct TileInfo
         obj = GameObject.Instantiate(tilePrefab, new Vector3(laneWidth * _lane + posOffset.x, ((float)(_isRamp ? _height - 1 : _height) / 2) * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);
         //Scale it up so we only have to use 1 object for the ground
         obj.transform.localScale = new Vector3(laneWidth, tileHeight * (_isRamp ? _height : _height + 1), tileLength);
-
+        //We need to update the texture scaling
         Renderer r = obj.GetComponent<Renderer>();
         r.material.SetTextureScale("_WallTex", new Vector2(1, _isRamp ? _height : _height + 1));
         r.material.SetTextureScale("_MainTex", new Vector2(1, tileLength));
