@@ -83,9 +83,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _runSpeed: 10
   _jumpVelocity: 7
+  _stepHeight: 0.35
   _laneSwapTime: 0.2
   _rollReactionTime: 0.3
-  _coyoteTime: 0.1
+  _coyoteTime: 0.2
   _fallKillVelocity: 10
   _vaultRange: 4
   _baseScoreMultiplier: 100

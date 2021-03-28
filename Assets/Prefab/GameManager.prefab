@@ -64,6 +64,10 @@ MonoBehaviour:
   - {fileID: 7618985421749997523, guid: b8af832617a7fc74b88acaef352ef81c, type: 3}
   - {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
   - {fileID: 6721257737778821531, guid: 24d9946828acd3a419693e00cc23c5c1, type: 3}
+  m_decorations:
+  - m_prefab: {fileID: 2964828650930704524, guid: 2664d09578aeab046816d192f438218a, type: 3}
+    m_decorationType: 2
+    m_spawnChance: 1
   m_probabilityToChangeHeight: 0.5
   m_probabilityForNonRequiredRamps: 0.2
 --- !u!114 &5562916684381745588

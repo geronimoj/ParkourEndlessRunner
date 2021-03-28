@@ -136,6 +136,12 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField]
     private GameObject[] obstacles = new GameObject[0];
     /// <summary>
+    /// The prefab used for curbs
+    /// </summary>
+    [Tooltip("The prefab used for generating curbs that appear when a layer drop down")]
+    [SerializeField]
+    private Decoration[] m_decorations = new Decoration[0];
+    /// <summary>
     /// The probability for the height of a tile to change when generated
     /// </summary>
     [Tooltip("The probability for the height of a tile to change when generated")]
@@ -238,7 +244,7 @@ public class LevelGenerator : MonoBehaviour
             _currentLength = 0;
             DeleteLevel();
         }
-
+        //If we are regenerating the level, recalculate the obstacle timers
         if (regenerate)
         {
             if (_laneObstacleTimer.Length != m_numberOfLanes)
@@ -247,12 +253,13 @@ public class LevelGenerator : MonoBehaviour
             for (int lane = 0; lane < m_numberOfLanes; lane++)
                 _laneObstacleTimer[lane] = (uint)Random.Range((int)_minSpaceBetweenObstacles, (int)_maxSpaceBetweenObstacles);
         }
+        //Just preparing some variables for later
         GameObject obstacle;
         bool canChangeHeight;
         int[] heights = new int[m_numberOfLanes];
         int[] prevHeights = new int[m_numberOfLanes];
         int tileIndex;
-
+        //Begin looping over the new layers we need to generate
         for (int i = _currentLength; i < layersToGenerate + _currentLength; i++)
         {
             tileIndex = i - _frontTilePos;
@@ -266,7 +273,7 @@ public class LevelGenerator : MonoBehaviour
                 float prob = Random.Range(0, (float)1);
                 canChangeHeight = prob < m_probabilityToChangeHeight;
                 int prevTileHeight = 0;
-
+                //If this is the first row, we can't get the previous tiles
                 if (tileIndex == 0)
                     canChangeHeight = true;
                 else
@@ -274,23 +281,22 @@ public class LevelGenerator : MonoBehaviour
                     prevTile = m_tiles[((tileIndex - 1) * (int)m_numberOfLanes) + lane];
                     prevTileHeight = (int)prevTile.Height;
                 }
-
-
+                //Store the previous tile height
                 prevHeights[lane] = prevTileHeight;
-
+                //Calculate the minimum and maximum height this tile could change to
                 int min, max;
                 min = prevTileHeight - (int)m_maxHeightChange < 0 ? 0 : prevTileHeight - (int)m_maxHeightChange;
                 max = prevTileHeight + (int)m_maxHeightChange >= m_numberOfLayers ? (int)m_numberOfLayers - 1 : prevTileHeight + (int)m_maxHeightChange;
-
+                //If this tile is a ramp, we don't change height
                 if (prevTile.IsRamp)
                     canChangeHeight = false;
-
+                //Should this tile not change in height
                 if (makeFlat)
                 {
                     canChangeHeight = false;
                     prevTileHeight = 1;
                 }
-
+                //Initialise the tile, store its height and itself
                 tile.Initialise((uint)lane, canChangeHeight ? (uint)Random.Range(min, max + 1) : (uint)prevTileHeight, (uint)i, false);
                 heights[lane] = (int)tile.Height;
                 m_tiles.Add(tile);
@@ -363,10 +369,79 @@ public class LevelGenerator : MonoBehaviour
                         _laneObstacleTimer[lane] = (uint)Random.Range((int)_minSpaceBetweenObstacles, (int)_maxSpaceBetweenObstacles);
                     }
                 }
-
             //Actually generate the lanes boxes and stuff
             for (int lane = 0; lane < m_numberOfLanes; lane++)
                 m_tiles[tileIndex * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset);
+
+            //Generate the decorations
+            float rand;
+            //0. Loop over the decorations
+            for (int d = 0; d < m_decorations.Length; d++)
+            {
+                rand = Random.Range(0, 1);
+                Decoration dec = m_decorations[d];
+                //Only spawn one if the chances are met
+                if (rand > dec.SpawnChance)
+                    continue;
+
+                //1. Check if the conditions for the decoration is met
+                switch(dec.DecorationType)
+                {
+                    case Decoration.DecoType.TileEnd:
+                        //If either of these checks pass, return true
+                        for (int lane = 0; lane < m_numberOfLanes; lane++)
+                        {
+                            //This code is for spawning the curbs on the side of the level
+                            ////Compare the height between the current row. If they are different, we need to put some edging
+                            //if (lane < m_numberOfLanes - 1 && heights[lane] - heights[lane + 1] != 0)
+                            //{   //Get the height the object should be spawned at
+                            //    //This will be true if the right lane is higher than the left lane
+                            //    bool leftSide = heights[lane] < heights[lane + 1];
+                            //    Vector3 pos = m_generateOffset;
+                            //    pos.y += (leftSide ? heights[lane + 1] : heights[lane]) * m_layerHeight + (m_layerHeight / 2);
+                            //    pos.x += m_laneWidth * (lane + 0.5f);
+
+                            //    float step = 1 / m_tileLength;
+                            //    //We loop from i - 0.5 to i + 0.5, to get the range between those values
+                            //    //We subtract an extra 0.01f from the condition to avoid floating point error
+                            //    for (float zPos = i - 0.5f + step / 2; zPos < i + 0.5f - 0.01f; zPos += step)
+                            //    {
+                            //        pos.z = m_tileLength * zPos + m_generateOffset.z;
+                            //        GameObject decoration = Instantiate(dec.m_prefab, pos, Quaternion.LookRotation(leftSide ? -Vector3.right : Vector3.right, Vector3.up));
+                            //        m_tiles[tileIndex * (int)m_numberOfLanes + lane].AddObstacle(ref decoration);
+                            //    }
+                            //}
+
+                            //Compare the height between the previous row
+                            if (prevHeights[lane] > heights[lane])
+                            {
+                                //Calculate the height
+                                Vector3 pos = m_generateOffset;
+                                //The y is the height of the tile multiplied by the height of the lane. This gives us the center of that tile
+                                //We then add an additional half layerHeight to get the point on top of the layer
+                                pos.y += prevHeights[lane] * m_layerHeight + (m_layerHeight / 2);
+                                //Z is a similar story but we are doing this based on the current tile instead of the previous tile
+                                pos.z += i * m_tileLength - (m_tileLength / 2);
+                                float step = 1 / m_laneWidth;
+                                //We assume that we want to spawn 1 of this object for each unit width of the lane
+                                for (float l = lane - 0.5f + step / 2; l < lane + 0.5f; l += step)
+                                {   //Calculate the x position starting from the front left corner of the tile
+                                    pos.x = m_laneWidth * l + m_generateOffset.x;
+                                    //Spawn the object
+                                    GameObject decoration = Instantiate(dec.m_prefab, pos, Quaternion.LookRotation(Vector3.forward, Vector3.up));
+                                    //Store the object so it gets deleted
+                                    m_tiles[tileIndex * (int)m_numberOfLanes + lane].AddObstacle(ref decoration);
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        Debug.LogWarning("Decoration Type " + dec.DecorationType + " condition not created yet! Create the conditions plz");
+                        break;
+                }
+                //2. Calculate the position the decoration should spawn
+                //3. Spawn and store the decoration on a tile
+            }
         }
 
         _currentLength += (int)layersToGenerate;
@@ -419,14 +494,13 @@ public class LevelGenerator : MonoBehaviour
             
             //Teleport the world
             for (int i = 0; i < m_tiles.Count; i++)
-            {
+                //For each of the objects on the tile, teleport them back
                 for (int tileObj = 0; tileObj < m_tiles[i].m_objectsOnTile.Count; tileObj++)
                 {
                     p = m_tiles[i].m_objectsOnTile[tileObj].transform.position;
                     p.z -= m_distanceUntilLoop;
                     m_tiles[i].m_objectsOnTile[tileObj].transform.position = p;
                 }
-            }
             //Reset the length values so iterators remain valid and we don't generate 100 units in front of the level. That would be bad
             _frontTilePos = 0;
             _currentLength = m_tiles.Count / (int)m_numberOfLanes;
@@ -567,4 +641,49 @@ public struct TileInfo
     {   //Store the object
         m_objectsOnTile.Add(obstacle);
     }
+}
+/// <summary>
+/// Stores information about decorations and where they are positioned
+/// </summary>
+[System.Serializable]
+public struct Decoration
+{
+    /// <summary>
+    /// The prefab for this decoration
+    /// </summary>
+    [Tooltip("The prefab for the decoration")]
+    public GameObject m_prefab;
+    /// <summary>
+    /// The type of decoration
+    /// </summary>
+    [Tooltip("The type of decoration. Determines spawn checks and spawning location")]
+    [SerializeField]
+    private DecoType m_decorationType;
+    /// <summary>
+    /// The type of decoration
+    /// </summary>
+    public DecoType DecorationType => m_decorationType;
+    /// <summary>
+    /// The type of decoration. Determines checks for valid spawn locations and spawning location
+    /// </summary>
+    public enum DecoType
+    {
+        FloorCenter = 0,
+        FloorSide,
+        TileEnd,
+        Wall,
+        WallLow,
+        WallHeigh,
+    }
+    /// <summary>
+    /// The chance of the decoration spawning
+    /// </summary>
+    [Tooltip("The chance of this decoration spawning")]
+    [SerializeField]
+    [Range(0, 1)]
+    private float m_spawnChance;
+    /// <summary>
+    /// The chance of this decoration spawning
+    /// </summary>
+    public float SpawnChance => m_spawnChance;
 }
