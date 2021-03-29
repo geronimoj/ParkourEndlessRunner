@@ -375,73 +375,26 @@ public class LevelGenerator : MonoBehaviour
 
             //Generate the decorations
             float rand;
-            //0. Loop over the decorations
-            for (int d = 0; d < m_decorations.Length; d++)
-            {
-                rand = Random.Range(0, 1);
-                Decoration dec = m_decorations[d];
-                //Only spawn one if the chances are met
-                if (rand > dec.SpawnChance)
-                    continue;
-
-                //1. Check if the conditions for the decoration is met
-                switch(dec.DecorationType)
+            //Make sure this isn't the first row so that the spawners don't have to continually check this
+            if (i != 0)
+                //0. Loop over the decorations
+                for (int d = 0; d < m_decorations.Length; d++)
                 {
-                    case Decoration.DecoType.TileEnd:
-                        //If either of these checks pass, return true
-                        for (int lane = 0; lane < m_numberOfLanes; lane++)
-                        {
-                            //This code is for spawning the curbs on the side of the level
-                            ////Compare the height between the current row. If they are different, we need to put some edging
-                            //if (lane < m_numberOfLanes - 1 && heights[lane] - heights[lane + 1] != 0)
-                            //{   //Get the height the object should be spawned at
-                            //    //This will be true if the right lane is higher than the left lane
-                            //    bool leftSide = heights[lane] < heights[lane + 1];
-                            //    Vector3 pos = m_generateOffset;
-                            //    pos.y += (leftSide ? heights[lane + 1] : heights[lane]) * m_layerHeight + (m_layerHeight / 2);
-                            //    pos.x += m_laneWidth * (lane + 0.5f);
+                    rand = Random.Range(0, 1);
+                    Decoration dec = m_decorations[d];
+                    //Only spawn one if the chances are met
+                    if (rand > dec.SpawnChance)
+                        continue;
 
-                            //    float step = 1 / m_tileLength;
-                            //    //We loop from i - 0.5 to i + 0.5, to get the range between those values
-                            //    //We subtract an extra 0.01f from the condition to avoid floating point error
-                            //    for (float zPos = i - 0.5f + step / 2; zPos < i + 0.5f - 0.01f; zPos += step)
-                            //    {
-                            //        pos.z = m_tileLength * zPos + m_generateOffset.z;
-                            //        GameObject decoration = Instantiate(dec.m_prefab, pos, Quaternion.LookRotation(leftSide ? -Vector3.right : Vector3.right, Vector3.up));
-                            //        m_tiles[tileIndex * (int)m_numberOfLanes + lane].AddObstacle(ref decoration);
-                            //    }
-                            //}
-
-                            //Compare the height between the previous row
-                            if (prevHeights[lane] > heights[lane])
-                            {
-                                //Calculate the height
-                                Vector3 pos = m_generateOffset;
-                                //The y is the height of the tile multiplied by the height of the lane. This gives us the center of that tile
-                                //We then add an additional half layerHeight to get the point on top of the layer
-                                pos.y += prevHeights[lane] * m_layerHeight + (m_layerHeight / 2);
-                                //Z is a similar story but we are doing this based on the current tile instead of the previous tile
-                                pos.z += i * m_tileLength - (m_tileLength / 2);
-                                float step = 1 / m_laneWidth;
-                                //We assume that we want to spawn 1 of this object for each unit width of the lane
-                                for (float l = lane - 0.5f + step / 2; l < lane + 0.5f; l += step)
-                                {   //Calculate the x position starting from the front left corner of the tile
-                                    pos.x = m_laneWidth * l + m_generateOffset.x;
-                                    //Spawn the object
-                                    GameObject decoration = Instantiate(dec.m_prefab, pos, Quaternion.LookRotation(Vector3.forward, Vector3.up));
-                                    //Store the object so it gets deleted
-                                    m_tiles[tileIndex * (int)m_numberOfLanes + lane].AddObstacle(ref decoration);
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        Debug.LogWarning("Decoration Type " + dec.DecorationType + " condition not created yet! Create the conditions plz");
-                        break;
+                    if (dec.DecorationSpawner == null)
+                    {
+                        Debug.LogWarning("Decoration Spawner for " + dec.m_prefab.name + " not created yet! Create the spawner plz");
+                        continue;
+                    }
+                    //Spawn the decoration using its spawner
+                    dec.DecorationSpawner.Spawn(dec.m_prefab, m_tiles, i, (uint)tileIndex * m_numberOfLanes,
+                        m_numberOfLanes, new TileSize(m_tileLength, m_layerHeight, m_laneWidth), m_generateOffset);
                 }
-                //2. Calculate the position the decoration should spawn
-                //3. Spawn and store the decoration on a tile
-            }
         }
 
         _currentLength += (int)layersToGenerate;
@@ -556,6 +509,12 @@ public struct TileInfo
         get { return _height; }
         set
         {
+            if (_isGenerated)
+            {
+                Debug.LogError("The tile has already been generated and variable height cannot be manipulated");
+                return;
+            }
+
             _height = value;
         }
     }
@@ -570,10 +529,20 @@ public struct TileInfo
     {
         get { return _isRamp; }
         set
-        {   //Adjust the size of the objects on this tile based on whether this tile needs to store a ramp
+        {
+            if (_isGenerated)
+            {
+                Debug.LogError("The tile has already been generated and variable IsRamp cannot be manipulated");
+                return;
+            }
+            //Adjust the size of the objects on this tile based on whether this tile needs to store a ramp
             _isRamp = value;
         }
     }
+    /// <summary>
+    /// Has this tile been generated yet? Determines which variables can be written to
+    /// </summary>
+    private bool _isGenerated;
     /// <summary>
     /// Initalises the tile
     /// </summary>
@@ -583,12 +552,20 @@ public struct TileInfo
     /// <param name="forwardPoint">The z step of this tile</param>
     /// <param name="isRamp">If this tile is a ramp</param>
     public void Initialise(uint lane, uint height, uint forwardPoint, bool isRamp)
-    {   //Set the length of objects to store
+    {   //Make sure the tile has not finished its generation before continuing
+        if (_isGenerated)
+        {
+            Debug.LogError("Cannot Re-Initialise Tile");
+            return;
+        }
+
+        //Set the length of objects to store
         m_objectsOnTile = new List<GameObject>();
         _lane = lane;
         _height = height;
         _forwardPoint = forwardPoint;
         _isRamp = isRamp;
+        _isGenerated = false;
     }
     /// <summary>
     /// Generates the tile based on the information given in the initialiser
@@ -600,7 +577,12 @@ public struct TileInfo
     /// <param name="tileLength">The length of a tile</param>
     /// <param name="posOffset">The position offset of the tile from the origin</param>
     public void GenerateTiles(GameObject tilePrefab, GameObject tileSlope, float laneWidth, float tileHeight, float tileLength, Vector3 posOffset)
-    {
+    {   //Make sure the tile has not finished its generation before continuing
+        if (_isGenerated)
+        {
+            Debug.LogError("Cannot Re-Generate Tile");
+            return;
+        }
         GameObject obj;
         //Generate the regular cube for the ground
         obj = GameObject.Instantiate(tilePrefab, new Vector3(laneWidth * _lane + posOffset.x, ((float)(_isRamp ? _height - 1 : _height) / 2) * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);
@@ -622,6 +604,8 @@ public struct TileInfo
             //Store it
             m_objectsOnTile.Add(obj);
         }
+        //The tile has been generated and cannot be edited
+        _isGenerated = true;
     }
     /// <summary>
     /// Instantiates and stores an obstacle gameObject on this tile
@@ -654,27 +638,15 @@ public struct Decoration
     [Tooltip("The prefab for the decoration")]
     public GameObject m_prefab;
     /// <summary>
-    /// The type of decoration
+    /// The spawner for the decoration
     /// </summary>
-    [Tooltip("The type of decoration. Determines spawn checks and spawning location")]
+    [Tooltip("The spawner used for this decoration")]
     [SerializeField]
-    private DecoType m_decorationType;
+    private DecorationSpawner _decorationSpawner;
     /// <summary>
-    /// The type of decoration
+    /// The spawner for the decoration
     /// </summary>
-    public DecoType DecorationType => m_decorationType;
-    /// <summary>
-    /// The type of decoration. Determines checks for valid spawn locations and spawning location
-    /// </summary>
-    public enum DecoType
-    {
-        FloorCenter = 0,
-        FloorSide,
-        TileEnd,
-        Wall,
-        WallLow,
-        WallHeigh,
-    }
+    public DecorationSpawner DecorationSpawner => _decorationSpawner;
     /// <summary>
     /// The chance of the decoration spawning
     /// </summary>
