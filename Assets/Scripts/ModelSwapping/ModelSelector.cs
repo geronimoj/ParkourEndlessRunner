@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 /// <summary>
 /// Determines which model was clicked on a loads that model on the player.
-/// Requires Camera component
+/// Requires Camera component.
+/// THIS IS NOW OBSELETE. THE MenuModelCamera DOES WHAT IS REQUIRED THROUGH BUTTONS.
 /// </summary>
 [RequireComponent(typeof(Camera))]
 public class ModelSelector : MonoBehaviour

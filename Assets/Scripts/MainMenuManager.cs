@@ -13,17 +13,29 @@ public class MainMenuManager : Manager
     [SerializeField]
     private GameObject[] _playerModels = new GameObject[0];
     /// <summary>
+    /// The number of player models the player can choose between
+    /// </summary>
+    public uint NumberOfPlayerModels => (uint)_playerModels.Length;
+    /// <summary>
     /// The positional offset of the models
     /// </summary>
     [Tooltip("The spacing between the models from left to right")]
     [SerializeField]
     private Vector3 _modelSpawnOffset = new Vector3();
     /// <summary>
+    /// The positional offset of the models from the origin of the world
+    /// </summary>
+    public Vector3 ModelSpawnOffset => _modelSpawnOffset;
+    /// <summary>
     /// The spacing between the models
     /// </summary>
     [Tooltip("The spacing between the models from left to right")]
     [SerializeField]
     private Vector3 _modelSpacing = new Vector3();
+    /// <summary>
+    /// The spacing between the origin of each model
+    /// </summary>
+    public Vector3 ModelSpacing => _modelSpacing;
     /// <summary>
     /// An array containing the game objects that need to be deleted eventually between menu presses
     /// </summary>
@@ -144,5 +156,20 @@ public class MainMenuManager : Manager
     public void CloseApp()
     {
         Application.Quit();
+    }
+    /// <summary>
+    /// Returns the ModelInfo of the selected model
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public ModelInfo GetModel(int index)
+    {   //Make sure the model is valid
+        if (index < 0 || index >= _playerModels.Length)
+        {
+            Debug.LogError("Index out of range!");
+            return new ModelInfo();
+        }
+        //Return the model info
+        return _playerModels[index].GetComponent<AISelector>().ModelInfo;
     }
 }
