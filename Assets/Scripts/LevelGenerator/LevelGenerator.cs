@@ -658,4 +658,16 @@ public struct Decoration
     /// The chance of this decoration spawning
     /// </summary>
     public float SpawnChance => m_spawnChance;
+    /// <summary>
+    /// Construct for Decoration struct. Primarily to "value is never assigned to" warnings from the console
+    /// </summary>
+    /// <param name="prefab">The prefab of the decoration</param>
+    /// <param name="spawner">The spawner for this decoration</param>
+    /// <param name="spawnChance">The chance of this decoration spawning</param>
+    public Decoration(GameObject prefab, DecorationSpawner spawner, float spawnChance)
+    {
+        m_prefab = prefab;
+        _decorationSpawner = spawner;
+        m_spawnChance = spawnChance;
+    }
 }

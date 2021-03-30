@@ -134,6 +134,10 @@ public class Player : MonoBehaviour
     /// </summary>
     private uint _lane = 1;
     /// <summary>
+    /// The previous lane the player was in
+    /// </summary>
+    private uint _prevLane = 1;
+    /// <summary>
     /// The current lane the player is in. Used for position calculations
     /// </summary>
     public uint CurrentLane => _lane;
@@ -432,6 +436,7 @@ public class Player : MonoBehaviour
         //If we are in a slide or vault, the player cannot change lanes
         if (!m_inAnimation && t_laneSwapTimer > _laneSwapTime)
         {
+            _prevLane = _lane;
             //Check if the player wants to change lanes this frame and that the lane change is a valid lane change
             if (_lane != 0 && _swapLane < 0)
             {
@@ -447,12 +452,11 @@ public class Player : MonoBehaviour
         //Increment the timer
         t_laneSwapTimer += Time.fixedDeltaTime;
         //We don't need to clamp the value since we ensured it was valid when initially changing it.
-        //Lerp the player over to the new lane
-        //Calculate the total move vector we need to move along
-        _move.x = (_lane * _lg.LaneWidth) - transform.position.x + _lg.GenerateOffset.x;
-        //Scale it by the time until we reach the lane swap completion
-        _move.x *= Mathf.Clamp(t_laneSwapTimer, 0, _laneSwapTime) / _laneSwapTime;
-        //Divide by time to ensure this is applied as pure velocity
+        //Lerp the player over to the new lane. We calculate the change in lane, then convert that lane, which may be a decimal into re-world cords
+        //Before finally subtracting the players x position to get a vector to that point
+        _move.x = Mathf.Lerp(_prevLane, _lane, t_laneSwapTimer / _laneSwapTime) * _lg.LaneWidth + _lg.GenerateOffset.x - transform.position.x;
+        //Divide by time to ensure this is applied as pure velocity. When we call move on the player, we multiply it by time so we need to do this otherwise the x component 
+        //Gets affected by time twice
         _move.x /= Time.fixedDeltaTime;
         //Set the player to not be swapping lanes 
         _swapLane = 0;
@@ -567,8 +571,7 @@ public class Player : MonoBehaviour
         //Reset the score
         _score = 0;
         //Set the starting lane for the player
-        _lane = _lg.NumberOfLanes / 2;
-
+        _prevLane = _lane = _lg.NumberOfLanes / 2; ;
         //Set the position of the player to spawn ever so slightly above the ground
         Vector3 pos;
         pos.y = _pc.colInfo.LowerHeight + _pc.colInfo.CollisionOffset * 2 + _lg.LayerHeight * 1.5f + _lg.GenerateOffset.y;

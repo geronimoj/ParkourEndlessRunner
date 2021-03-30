@@ -84,7 +84,7 @@ MonoBehaviour:
   _runSpeed: 10
   _jumpVelocity: 7
   _stepHeight: 0.35
-  _laneSwapTime: 0.2
+  _laneSwapTime: 0.1
   _rollReactionTime: 0.3
   _coyoteTime: 0.2
   _fallKillVelocity: 10
