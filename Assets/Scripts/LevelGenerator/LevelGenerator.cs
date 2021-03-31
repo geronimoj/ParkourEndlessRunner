@@ -134,7 +134,7 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     [Tooltip("All of the obstacles you want to be able to spawn")]
     [SerializeField]
-    private GameObject[] obstacles = new GameObject[0];
+    private GameObject[] _obstacles = new GameObject[0];
     /// <summary>
     /// The prefab used for curbs
     /// </summary>
@@ -346,7 +346,7 @@ public class LevelGenerator : MonoBehaviour
                 }
             //Instantiate any obstacles to slide or vault over
             //Make sure we have obstacles
-            if (!makeFlat && obstacles.Length != 0)
+            if (!makeFlat && _obstacles.Length != 0)
                 //Decrement the timers if they haven't already reached 0
                 for (int lane = 0; lane < m_numberOfLanes; lane++)
                 {
@@ -360,7 +360,7 @@ public class LevelGenerator : MonoBehaviour
                     else if (!m_tiles[currentTile - (int)m_numberOfLanes].IsRamp)
                     {
                         //Select a random obstacle to spawn
-                        obstacle = obstacles[Random.Range(0, obstacles.Length)];
+                        obstacle = _obstacles[Random.Range(0, _obstacles.Length)];
                         TileInfo tile = m_tiles[currentTile];
                         tile.AddObstacle(obstacle, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset);
 

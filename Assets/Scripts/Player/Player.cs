@@ -609,4 +609,15 @@ public class Player : MonoBehaviour
             return true;
         return false;
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (_pc != null)
+        {
+            Vector3 p = _pc.colInfo.GetLowestPoint();
+            Gizmos.DrawLine(p, p + Vector3.forward * (_pc.colInfo.TrueRadius + _vaultRange));
+        }
+    }
+#endif
 }
