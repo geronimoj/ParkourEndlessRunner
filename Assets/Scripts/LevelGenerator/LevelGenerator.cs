@@ -210,7 +210,7 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     [ContextMenu("Regenerate Level")]
     public void CreateLevel()
-    {
+    {   //Create the level but starting flat for a bit to avoid killing the player with obstacles / walls
         GenerateLevel((uint)m_initalFlatLength, true, true);
         ExtendLevel((uint)m_levelLength);
     }
@@ -219,7 +219,7 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     [ContextMenu("Extend Level")]
     void ExtendTestLevel()
-    {
+    {   //Extends the level a fixed 5 tiles. This exists only for debugging purposes
         ExtendLevel(5);
     }
     /// <summary>
@@ -263,7 +263,9 @@ public class LevelGenerator : MonoBehaviour
         for (int i = _currentLength; i < layersToGenerate + _currentLength; i++)
         {
             tileIndex = i - _frontTilePos;
-
+            //Loop over each lane and generate a new tile for it
+            //The following for loops are kept separate because some of them
+            //contain continue statements which would break this loop
             for (int lane = 0; lane < m_numberOfLanes; lane++)
             {
                 TileInfo tile = new TileInfo();
@@ -353,7 +355,7 @@ public class LevelGenerator : MonoBehaviour
                     int currentTile = tileIndex * (int)m_numberOfLanes + lane;
                     if (m_tiles[currentTile].IsRamp)
                         continue;
-
+                    //Decrement the lane timers, if they are already 0, attempt to spawn an obstacle
                     if (_laneObstacleTimer[lane] != 0)
                         _laneObstacleTimer[lane]--;
                     //If they have reached 0, check if we can spawn an obstacle on that tile
@@ -410,6 +412,7 @@ public class LevelGenerator : MonoBehaviour
             for (int objects = 0; objects < m_tiles[i].m_objectsOnTile.Count; objects++)
                 //Destroy the object
                 DestroyImmediate(m_tiles[i].m_objectsOnTile[objects]);
+        //Clear the tiles to avoid reading invalid memory
         m_tiles.Clear();
     }
     /// <summary>
@@ -417,7 +420,7 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     /// <param name="tilesToDelete">The number of rows to delete</param>
     void DeleteFrontTiles(uint tilesToDelete)
-    {
+    {   //Loop over the rows that should be deleted
         for (int i = 0; i < tilesToDelete * m_numberOfLanes; i++)
         {   //Loop through the first tile and delete it. We don't use i because we then remove this tile from the list, making the next tile the first tile
             for (int tileObj = 0; tileObj < m_tiles[0].m_objectsOnTile.Count; tileObj++)
@@ -432,7 +435,7 @@ public class LevelGenerator : MonoBehaviour
     private void FixedUpdate()
     {   //Keep generating the world
         if (_player.position.z > (_frontTilePos + 1) * m_tileLength)
-        {
+        {   //Delete the front and generate a new tile
             _frontTilePos++;
             DeleteFrontTiles(1);
             ExtendLevel(1);
@@ -457,7 +460,7 @@ public class LevelGenerator : MonoBehaviour
             //Reset the length values so iterators remain valid and we don't generate 100 units in front of the level. That would be bad
             _frontTilePos = 0;
             _currentLength = m_tiles.Count / (int)m_numberOfLanes;
-
+            //Re-sync the transforms so the players raycasts do not miss
             Physics.SyncTransforms();
         }
     }
@@ -508,7 +511,7 @@ public struct TileInfo
     {
         get { return _height; }
         set
-        {
+        {   //If the tile has already been generated, this value cannot be manipulated
             if (_isGenerated)
             {
                 Debug.LogError("The tile has already been generated and variable height cannot be manipulated");
@@ -529,13 +532,13 @@ public struct TileInfo
     {
         get { return _isRamp; }
         set
-        {
+        {   //If the tile has already been generated, this value cannot be manipulated
             if (_isGenerated)
             {
                 Debug.LogError("The tile has already been generated and variable IsRamp cannot be manipulated");
                 return;
             }
-            //Adjust the size of the objects on this tile based on whether this tile needs to store a ramp
+
             _isRamp = value;
         }
     }
@@ -559,7 +562,6 @@ public struct TileInfo
             return;
         }
 
-        //Set the length of objects to store
         m_objectsOnTile = new List<GameObject>();
         _lane = lane;
         _height = height;
@@ -583,6 +585,7 @@ public struct TileInfo
             Debug.LogError("Cannot Re-Generate Tile");
             return;
         }
+        //Storage space for the objects to save on memory, we will re-use this.
         GameObject obj;
         //Generate the regular cube for the ground
         obj = GameObject.Instantiate(tilePrefab, new Vector3(laneWidth * _lane + posOffset.x, ((float)(_isRamp ? _height - 1 : _height) / 2) * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);

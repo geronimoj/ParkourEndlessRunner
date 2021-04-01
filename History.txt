@@ -1,0 +1,10 @@
+30
+False
+False
+Assets/Prefab/LevelParts/Slope.prefab
+Assets/Prefab/LevelParts/VaultObstacle.prefab
+Assets/Prefab/LevelParts/VaultObstacleVent.prefab
+Assets/Editor/HistoryWindow.cs
+Assets/Character/RacerMats/Ch20_1001_Normal.png
+Assets/Shaders/PopUp.shader
+

@@ -1,16 +1,17 @@
-﻿Shader "Custom/PopUp"
+﻿Shader "Custom/Obstacle"
 {
     Properties
     {
-        _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _WallTex ("Wall Texture", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+        _Color("Color", Color) = (1,1,1,1)
+        _Runner("Runner Vision Colour", Color) = (1, 1, 1, 1)
+        _MainTex("Albedo (RGB)", 2D) = "white" {}
+        _WallTex("Wall Texture", 2D) = "white" {}
+        _Glossiness("Smoothness", Range(0,1)) = 0.5
+        _Metallic("Metallic", Range(0,1)) = 0.0
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType" = "Opaque" }
         LOD 200
 
         CGPROGRAM
@@ -28,19 +29,25 @@
             float2 uv_MainTex;
             float2 uv_WallTex;
             float3 vertexNormal;
+            float3 worldPos;
         };
 
         half _Glossiness;
         half _Metallic;
         fixed4 _Color;
+        fixed4 _Runner;
+        float _RunnerStart;
+        float _RunnerEnd;
         float _DropEnd;
 
         void vert(inout appdata_full v, out Input o)
-        {   
+        {
             UNITY_INITIALIZE_OUTPUT(Input, o);
             o.vertexNormal = v.normal;
             //Gets the world position of the vertex
             float3 worldPos = mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1.0)).xyz;
+
+            o.worldPos = worldPos;
             //Gets the distance to that point
             float dist = distance(worldPos, _WorldSpaceCameraPos);
             //Gets the distance past _DropEnd as a value between 0 and 1 to determine how much to reduce the y axis of the vertex by
@@ -58,13 +65,13 @@
             // put more per-instance properties here
         UNITY_INSTANCING_BUFFER_END(Props)
 
-        void surf (Input IN, inout SurfaceOutputStandard o)
+        void surf(Input IN, inout SurfaceOutputStandard o)
         {   //Get the dot onto the forward and right vector of the normal. This is used to determine if a surface is pointing upwards, aka, floor or wall
             //The value is made positive to reduce the number of checks
             float d = abs(dot(IN.vertexNormal, float3(1, 0, 1)));
             // Albedo comes from a texture tinted by color
             fixed4 c = d >= 0.9 ? tex2D(_WallTex, IN.uv_WallTex) : tex2D(_MainTex, IN.uv_MainTex);
-            c *= _Color;
+            c *= lerp(_Runner, _Color, saturate((distance(IN.worldPos, _WorldSpaceCameraPos) - _RunnerEnd) / (_RunnerStart - _RunnerEnd)));
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
@@ -73,5 +80,5 @@
         }
         ENDCG
     }
-    FallBack "Diffuse"
+        FallBack "Diffuse"
 }

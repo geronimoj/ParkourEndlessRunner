@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8599937984738530562}
   - component: {fileID: 8599937984738530563}
   - component: {fileID: 5562916684381745588}
+  - component: {fileID: -5501823956787916604}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: GameManager
@@ -59,11 +60,7 @@ MonoBehaviour:
   m_tiles: []
   _minSpaceBetweenObstacles: 4
   _maxSpaceBetweenObstacles: 6
-  obstacles:
-  - {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
-  - {fileID: 7618985421749997523, guid: b8af832617a7fc74b88acaef352ef81c, type: 3}
-  - {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
-  - {fileID: 6721257737778821531, guid: 24d9946828acd3a419693e00cc23c5c1, type: 3}
+  _obstacles: []
   m_decorations:
   - m_prefab: {fileID: 6680034393095984227, guid: ecba83552df0f4649a8cede9a80bce1a, type: 3}
     _decorationSpawner: {fileID: 11400000, guid: bef8f5a357dd1604689b646628185aba, type: 2}
@@ -85,3 +82,18 @@ MonoBehaviour:
   m_pauseMenu: {fileID: 0}
   m_deadText: {fileID: 0}
   m_menuButton: {fileID: 0}
+--- !u!114 &-5501823956787916604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8599937984738530560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d6dbbed94e104743bec5ff7e3977fc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dropDist: 70
+  _runnerBegin: 25
+  _runnerEnd: 20
