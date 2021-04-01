@@ -60,7 +60,11 @@ MonoBehaviour:
   m_tiles: []
   _minSpaceBetweenObstacles: 4
   _maxSpaceBetweenObstacles: 6
-  _obstacles: []
+  _obstacles:
+  - {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
+  - {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
+  - {fileID: 7618985421749997523, guid: b8af832617a7fc74b88acaef352ef81c, type: 3}
+  - {fileID: 6721257737778821531, guid: 24d9946828acd3a419693e00cc23c5c1, type: 3}
   m_decorations:
   - m_prefab: {fileID: 6680034393095984227, guid: ecba83552df0f4649a8cede9a80bce1a, type: 3}
     _decorationSpawner: {fileID: 11400000, guid: bef8f5a357dd1604689b646628185aba, type: 2}
