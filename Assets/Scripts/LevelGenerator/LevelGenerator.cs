@@ -177,6 +177,20 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     public float ProbabilityForNonRequiredRamp => m_probabilityForNonRequiredRamps;
     /// <summary>
+    /// The probability for a door to an indoor section of the level to spawn
+    /// </summary>
+    [Tooltip("The probability for a door to an indoor section of the level to spawn")]
+    [Range(0, 1)]
+    [SerializeField]
+    private float m_probabilityToSpawnDoor = 0.1f;
+
+    [Space]
+    [Header("Indoors Info")]
+
+    [Tooltip("The minimum length of an indoor section")]
+    [SerializeField]
+    private uint minIndoorLength = 2;
+    /// <summary>
     /// An array to store how long until a lane can spawn an obstacle
     /// </summary>
     private uint[] _laneObstacleTimer = new uint[0];
@@ -311,8 +325,21 @@ public class LevelGenerator : MonoBehaviour
                     canChangeHeight = false;
                     prevTileHeight = 1;
                 }
+                //Store the height
+                uint height = canChangeHeight ? (uint)Random.Range(min, max + 1) : (uint)prevTileHeight;
                 //Initialise the tile, store its height and itself
-                tile.Initialise((uint)lane, canChangeHeight ? (uint)Random.Range(min, max + 1) : (uint)prevTileHeight, (uint)i, false);
+                tile.Initialise((uint)lane, height, (uint)i, false);
+
+                //If the previous tile was indoors, we need to update this tile
+                if (prevTile.HasIndoors)
+                {   //If we haven't met the minimum distance we want to set the indoor height
+                    if (prevTile.IndoorLength < minIndoorLength)
+                        tile.SetIndoorHeight(prevTile.IndoorHeight, prevTile.IndoorLength + 1);
+                    //Once we have met the minimum distance, we only need to continue the indoor section until the height drops below the indoor height
+                    else if (height > prevTile.IndoorHeight)
+                        tile.SetIndoorHeight(prevTile.IndoorHeight, prevTile.IndoorLength + 1);
+                }
+
                 heights[lane] = (int)tile.Height;
                 m_tiles.Add(tile);
             }
@@ -336,21 +363,29 @@ public class LevelGenerator : MonoBehaviour
                     //Repeat for the right side
                     if (lane + 1 < m_numberOfLanes && prevHeights[lane + 1] <= prevHeights[lane] && heights[lane + 1] - prevHeights[lane + 1] <= 0)
                         validLanes++;
-
+                    //Get the current tile
                     TileInfo current = m_tiles[tileIndex * (int)m_numberOfLanes + lane];
+
+                    float prob = Random.Range(0, (float)1);
                     //If not, we make this tile a ramp and reduce its height
                     if (validLanes == 0)
-                    {
-                        current.IsRamp = true;
-                        //Reduce the height
-                        current.Height = (uint)prevHeights[lane] + 1;
-
-                        //We also reduce it here sp that, when we are checking for valid lanes, a lane with a ramp 
-                        //will be treated as having equal height so it can be counted as a valid lane
-                        heights[lane] = prevHeights[lane];
+                    {   //Check if we should spawn a door to an indoor section
+                        if (prob < m_probabilityToSpawnDoor)
+                            //Set the height for the indoor section
+                            current.SetIndoorHeight((uint)prevHeights[lane], 0);
+                        //Otherwise spawn a ramp
+                        else
+                        {
+                            current.IsRamp = true;
+                            //Reduce the height
+                            current.Height = (uint)prevHeights[lane] + 1;
+                            //We also reduce it here sp that, when we are checking for valid lanes, a lane with a ramp 
+                            //will be treated as having equal height so it can be counted as a valid lane
+                            heights[lane] = prevHeights[lane];
+                        }
                     }
                     //Even if there is a valid path, if the heightChange is only 1, roll to convert it into a ramp
-                    else if (heightChange == 1 && Random.Range(0, (float)1) <= m_probabilityForNonRequiredRamps)
+                    else if (heightChange == 1 && prob <= m_probabilityForNonRequiredRamps)
                     {
                         current.IsRamp = true;
                         //We also reduce it here sp that, when we are checking for valid lanes, a lane with a ramp 
@@ -359,7 +394,7 @@ public class LevelGenerator : MonoBehaviour
                     }
                     m_tiles[tileIndex * (int)m_numberOfLanes + lane] = current;
                 }
-            //Instantiate any obstacles to slide or vault over
+            //Generate Obstacles
             //Make sure we have obstacles
             if (!makeFlat && _obstacles.Length != 0)
                 //Decrement the timers if they haven't already reached 0
@@ -564,6 +599,30 @@ public struct TileInfo
         }
     }
     /// <summary>
+    /// Does this tile have an indoor section
+    /// </summary>
+    private bool _hasIndoors;
+    /// <summary>
+    /// Does this tile have an indoor section
+    /// </summary>
+    public bool HasIndoors => _hasIndoors;
+    /// <summary>
+    /// What is the height of the indoor section
+    /// </summary>
+    private uint _indoorHeight;
+    /// <summary>
+    /// What is the height of the indoor section
+    /// </summary>
+    public uint IndoorHeight => _indoorHeight;
+    /// <summary>
+    /// How long the indoor section has lasted
+    /// </summary>
+    private int _indoorLength;
+    /// <summary>
+    /// How long the indoor section has lasted
+    /// </summary>
+    public int IndoorLength => _indoorLength;
+    /// <summary>
     /// Has this tile been generated yet? Determines which variables can be written to
     /// </summary>
     private bool _isGenerated;
@@ -589,6 +648,21 @@ public struct TileInfo
         _forwardPoint = forwardPoint;
         _isRamp = isRamp;
         _isGenerated = false;
+        _hasIndoors = false;
+        _indoorHeight = 0;
+    }
+    /// <summary>
+    /// Sets the tiles indoor height. Also sets the tile to be indoors
+    /// </summary>
+    /// <param name="height">The height of the indoor section of the tile</param>
+    public void SetIndoorHeight(uint height, int length)
+    {
+        _hasIndoors = true;
+        _indoorHeight = height;
+        _indoorLength = length;
+
+        if (_height <= _indoorHeight)
+            _height = _indoorHeight + 1;
     }
     /// <summary>
     /// Generates the tile based on the information given in the initialiser
@@ -616,6 +690,9 @@ public struct TileInfo
         Renderer r = obj.GetComponent<Renderer>();
         r.material.SetTextureScale("_WallTex", new Vector2(1, _isRamp ? _height : _height + 1));
         r.material.SetTextureScale("_MainTex", new Vector2(1, tileLength));
+        //Temporary debugging for doors
+        if (_hasIndoors)
+            r.material.SetColor("_Color", Color.green);
         //Store it
         m_objectsOnTile.Add(obj);
         //If we have a ramp, create it
