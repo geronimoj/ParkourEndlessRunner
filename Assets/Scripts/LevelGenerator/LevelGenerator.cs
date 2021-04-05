@@ -5,7 +5,9 @@ using UnityEngine;
 /// </summary>
 [DefaultExecutionOrder(200)]
 public class LevelGenerator : MonoBehaviour
-{       
+{
+    [Space]
+    [Header("Tile Size Info")]
     /// <summary>
     /// The width of a lane
     /// </summary>
@@ -36,6 +38,9 @@ public class LevelGenerator : MonoBehaviour
     /// The length of a tile
     /// </summary>
     public float TileLength => m_tileLength;
+
+    [Space]
+    [Header("Level Size Info")]
     /// <summary>
     /// The number of lanes
     /// </summary>
@@ -89,6 +94,18 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField]
     private float m_distanceUntilLoop = 100;
     /// <summary>
+    /// The positional offset of the level from the origin
+    /// </summary>
+    [Tooltip("The offset of the level upon generation in global co-ordinates")]
+    [SerializeField]
+    private Vector3 m_generateOffset = new Vector3();
+    /// <summary>
+    /// The positional offset of the level from the origin
+    /// </summary>
+    public Vector3 GenerateOffset => m_generateOffset;
+    [Space]
+    [Header("Prefabs")]
+    /// <summary>
     /// The prefab to use for general tiles
     /// </summary>
     [Tooltip("The prefab used for generating tiles. The object should be a perfect cube with no scale. It will be scaled upon initialisation")]
@@ -101,22 +118,14 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField]
     private GameObject m_slopePrefab = null;
     /// <summary>
-    /// The positional offset of the level from the origin
-    /// </summary>
-    [Tooltip("The offset of the level upon generation in global co-ordinates")]
-    [SerializeField]
-    private Vector3 m_generateOffset = new Vector3();
-    /// <summary>
-    /// The positional offset of the level from the origin
-    /// </summary>
-    public Vector3 GenerateOffset => m_generateOffset;
-    /// <summary>
     /// A list of all active tiles for debugging purposes
     /// </summary>
     //Show for debugging purposes
     [Tooltip("The tiles generated")]
     [SerializeField]
     private List<TileInfo> m_tiles = new List<TileInfo>();
+    [Space]
+    [Header("Obstacles")]
     /// <summary>
     /// The min number of tiles between obstacle spawns
     /// </summary>
@@ -134,13 +143,17 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     [Tooltip("All of the obstacles you want to be able to spawn")]
     [SerializeField]
-    private GameObject[] _obstacles = new GameObject[0];
+    private Obstacle[] _obstacles = new Obstacle[0];
+    [Space]
+    [Header("Decorations")]
     /// <summary>
     /// The prefab used for curbs
     /// </summary>
     [Tooltip("The prefab used for generating curbs that appear when a layer drop down")]
     [SerializeField]
     private Decoration[] m_decorations = new Decoration[0];
+    [Space]
+    [Header("Level Generation")]
     /// <summary>
     /// The probability for the height of a tile to change when generated
     /// </summary>
@@ -362,11 +375,19 @@ public class LevelGenerator : MonoBehaviour
                     else if (!m_tiles[currentTile - (int)m_numberOfLanes].IsRamp)
                     {
                         //Select a random obstacle to spawn
-                        obstacle = _obstacles[Random.Range(0, _obstacles.Length)];
-                        TileInfo tile = m_tiles[currentTile];
-                        tile.AddObstacle(obstacle, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset);
+                        int obstIndex = Random.Range(0, _obstacles.Length);
+                        obstacle = _obstacles[obstIndex].m_prefab;
+                        //Get a reference to the tile to avoid more indexing
+                        TileInfo t = m_tiles[currentTile];
+                        //Check if the obstacle is valid
+                        if (_obstacles[obstIndex].Spawner != null && obstacle != null)
+                            //Spawn the obstacle
+                            _obstacles[obstIndex].Spawner.Spawn(obstacle, in m_tiles, (uint)currentTile, 
+                                //Since the tile hasn't yet been created, we have to re-calculate the position of the tile. This could be optimised by the position of the tile being calculated in initialisation of the tile
+                                //And being stored on the tile. LOOK INTO THIS LATER
+                                new Vector3(m_laneWidth * t.Lane + m_generateOffset.x, (t.Height + 0.5f) * m_layerHeight + m_generateOffset.y, t.ForwardPoint * m_tileLength + m_generateOffset.z), 
+                                m_laneWidth, m_tileLength, m_layerHeight, m_numberOfLanes);
 
-                        m_tiles[currentTile] = tile;
                         //Reset the timer
                         _laneObstacleTimer[lane] = (uint)Random.Range((int)_minSpaceBetweenObstacles, (int)_maxSpaceBetweenObstacles);
                     }
@@ -672,5 +693,37 @@ public struct Decoration
         m_prefab = prefab;
         _decorationSpawner = spawner;
         m_spawnChance = spawnChance;
+    }
+}
+/// <summary>
+/// Stores information about Obstacles
+/// </summary>
+[System.Serializable]
+public struct Obstacle
+{
+    /// <summary>
+    /// The prefab for this obstacle
+    /// </summary>
+    [Tooltip("The prefab for this obstacle")]
+    public GameObject m_prefab;
+    /// <summary>
+    /// Stores the spawner for this obstacle
+    /// </summary>
+    [Tooltip("The spawner for this obstacle")]
+    [SerializeField]
+    private ObstacleSpawner _spawner;
+    /// <summary>
+    /// Returns the spawner for this obstacle
+    /// </summary>
+    public ObstacleSpawner Spawner => _spawner;
+    /// <summary>
+    /// Constructor for Obstacle
+    /// </summary>
+    /// <param name="prefab">The prefab for the obstacle</param>
+    /// <param name="spawner">The spawning behaviour to use for the obstacle</param>
+    public Obstacle(GameObject prefab, ObstacleSpawner spawner)
+    {
+        m_prefab = prefab;
+        _spawner = spawner;
     }
 }
