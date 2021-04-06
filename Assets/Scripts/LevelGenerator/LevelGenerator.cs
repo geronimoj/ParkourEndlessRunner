@@ -377,7 +377,7 @@ public class LevelGenerator : MonoBehaviour
                             current.IsRamp = true;
                             //Reduce the height
                             current.Height = (uint)prevHeights[lane] + 1;
-                            //We also reduce it here sp that, when we are checking for valid lanes, a lane with a ramp 
+                            //We also reduce it here so that, when we are checking for valid lanes, a lane with a ramp 
                             //will be treated as having equal height so it can be counted as a valid lane
                             heights[lane] = prevHeights[lane];
                         }
