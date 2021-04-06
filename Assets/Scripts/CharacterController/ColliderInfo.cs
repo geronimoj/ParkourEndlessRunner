@@ -44,6 +44,11 @@ public struct ColliderInfo
     [Range(0, 90)]
     private float slopeAngle;
     /// <summary>
+    /// The layer/s the capsual can collide with
+    /// </summary>
+    [Tooltip("The layer/s the capsual can collide with")]
+    public LayerMask ground;
+    /// <summary>
     /// Determines wether the position offset of the collider should be read as local or global co-ordinates
     /// TLDR: Should positionOffset be affected by origin transform rotation.
     /// </summary>
@@ -667,7 +672,7 @@ public struct ColliderInfo
     /// <returns>Returns the collision information for the hit objects</returns>
     private static RaycastHit[] CastAllGivenRadius(ColliderInfo c, Vector3 castVec, float radius, Vector3 offset)
     {   //Perform the raycast
-        RaycastHit[] h = Physics.CapsuleCastAll(c.GetUpperPoint() + offset, c.GetLowerPoint() + offset, radius, castVec.normalized, castVec.magnitude);
+        RaycastHit[] h = Physics.CapsuleCastAll(c.GetUpperPoint() + offset, c.GetLowerPoint() + offset, radius, castVec.normalized, castVec.magnitude, c.ground);
         //Sort the hit info by length so that the closest is first
         System.Array.Sort(h, Conditions.CompareDist);
         return h;

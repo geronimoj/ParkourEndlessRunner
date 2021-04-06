@@ -329,17 +329,15 @@ public class LevelGenerator : MonoBehaviour
                 uint height = canChangeHeight ? (uint)Random.Range(min, max + 1) : (uint)prevTileHeight;
                 //Initialise the tile, store its height and itself
                 tile.Initialise((uint)lane, height, (uint)i, false);
-
+                //Determine if a tile should be indoors
                 //If the previous tile was indoors, we need to update this tile
-                if (prevTile.HasIndoors)
-                {   //If we haven't met the minimum distance we want to set the indoor height
-                    if (prevTile.IndoorLength < minIndoorLength)
-                        tile.SetIndoorHeight(prevTile.IndoorHeight, prevTile.IndoorLength + 1);
-                    //Once we have met the minimum distance, we only need to continue the indoor section until the height drops below the indoor height
-                    else if (height > prevTile.IndoorHeight)
-                        tile.SetIndoorHeight(prevTile.IndoorHeight, prevTile.IndoorLength + 1);
-                }
-
+                //If we haven't met the minimum distance we want to set the indoor height
+                //Once we have met the minimum distance, we only need to continue the indoor section until the height drops below the indoor height
+                if (prevTile.HasIndoors && (prevTile.IndoorLength < minIndoorLength || height > prevTile.IndoorHeight))
+                    //This works for making a strait line through the environment for an indoor section
+                    tile.SetIndoorHeight(prevTile.IndoorHeight, prevTile.IndoorLength + 1);
+                
+                //Store the height and tile
                 heights[lane] = (int)tile.Height;
                 m_tiles.Add(tile);
             }
@@ -529,6 +527,18 @@ public class LevelGenerator : MonoBehaviour
     {
         numberOfLayers = layers;
         numberOfLanes = lanes;
+    }
+    /// <summary>
+    /// Returns a copy of the tile at index.
+    /// </summary>
+    /// <param name="index">The index of the tile</param>
+    /// <returns>Returns a new TileInfo with all values set to false if the index is invalid</returns>
+    public TileInfo GetTileCopy(int index)
+    {   //Make sure the index is valid
+        if (index < 0 || index >= m_tiles.Count)
+            return new TileInfo();
+
+        return m_tiles[index];
     }
 }
 /// <summary>
