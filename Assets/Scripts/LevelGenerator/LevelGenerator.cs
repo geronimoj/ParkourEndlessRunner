@@ -206,6 +206,8 @@ public class LevelGenerator : MonoBehaviour
     /// Store a reference to the players transform for distance and position calculations
     /// </summary>
     private Transform _player;
+
+    public LevelMeshSyncer lms;
     /// <summary>
     /// Initalises some variables
     /// </summary>
@@ -274,6 +276,9 @@ public class LevelGenerator : MonoBehaviour
         //If we are regenerating the level, recalculate the obstacle timers
         if (regenerate)
         {
+            if (lms != null)
+                lms.ResetMesh();
+
             if (_laneObstacleTimer.Length != m_numberOfLanes)
                 _laneObstacleTimer = new uint[m_numberOfLanes];
 
@@ -429,6 +434,15 @@ public class LevelGenerator : MonoBehaviour
             for (int lane = 0; lane < m_numberOfLanes; lane++)
                 m_tiles[tileIndex * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset);
 
+            if (lms != null)
+            {
+                int start = tileIndex * (int)m_numberOfLanes;
+                TileInfo[] newTiles = new TileInfo[m_numberOfLanes];
+                for (int lane = 0; lane < newTiles.Length; lane++)
+                    newTiles[lane] = m_tiles[start + lane];
+
+                lms.ExtendLevelMesh(newTiles, prevHeights, m_laneWidth, m_layerHeight, m_tileLength, (int)numberOfLayers);
+            }
             //Generate the decorations
             float rand;
             //Make sure this isn't the first row so that the spawners don't have to continually check this
