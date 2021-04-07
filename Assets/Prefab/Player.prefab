@@ -65,7 +65,7 @@ MonoBehaviour:
     slopeAngle: 50
     ground:
       serializedVersion: 2
-      m_Bits: 1
+      m_Bits: 1537
     positionOffsetIsGlobal: 1
     rotationIsGlobal: 1
   direction:

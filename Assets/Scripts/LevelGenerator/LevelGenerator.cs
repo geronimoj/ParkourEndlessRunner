@@ -118,6 +118,12 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField]
     private GameObject m_slopePrefab = null;
     /// <summary>
+    /// Prefab used for the indoors sections
+    /// </summary>
+    [Tooltip("The prefab used for generating slopes. Angle of slope should be 45 degrees as it is scaled up upon generation")]
+    [SerializeField]
+    private GameObject m_indoorPrefab = null;
+    /// <summary>
     /// A list of all active tiles for debugging purposes
     /// </summary>
     //Show for debugging purposes
@@ -206,8 +212,6 @@ public class LevelGenerator : MonoBehaviour
     /// Store a reference to the players transform for distance and position calculations
     /// </summary>
     private Transform _player;
-
-    public LevelMeshSyncer lms;
     /// <summary>
     /// Initalises some variables
     /// </summary>
@@ -276,9 +280,6 @@ public class LevelGenerator : MonoBehaviour
         //If we are regenerating the level, recalculate the obstacle timers
         if (regenerate)
         {
-            if (lms != null)
-                lms.ResetMesh();
-
             if (_laneObstacleTimer.Length != m_numberOfLanes)
                 _laneObstacleTimer = new uint[m_numberOfLanes];
 
@@ -373,7 +374,7 @@ public class LevelGenerator : MonoBehaviour
                     //If not, we make this tile a ramp and reduce its height
                     if (validLanes == 0)
                     {   //Check if we should spawn a door to an indoor section
-                        if (prob < m_probabilityToSpawnDoor)
+                        if (!current.HasIndoors && prob < m_probabilityToSpawnDoor)
                             //Set the height for the indoor section
                             current.SetIndoorHeight((uint)prevHeights[lane], 0);
                         //Otherwise spawn a ramp
@@ -432,17 +433,17 @@ public class LevelGenerator : MonoBehaviour
                 }
             //Actually generate the lanes boxes and stuff
             for (int lane = 0; lane < m_numberOfLanes; lane++)
-                m_tiles[tileIndex * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset);
-
-            if (lms != null)
-            {
-                int start = tileIndex * (int)m_numberOfLanes;
-                TileInfo[] newTiles = new TileInfo[m_numberOfLanes];
-                for (int lane = 0; lane < newTiles.Length; lane++)
-                    newTiles[lane] = m_tiles[start + lane];
-
-                lms.ExtendLevelMesh(newTiles, prevHeights, m_laneWidth, m_layerHeight, m_tileLength, (int)numberOfLayers);
+            {   //Get the neighbouring tile heights in the specified order
+                int[] neighbourHeights = new int[] { -1, -1, -1 };
+                neighbourHeights[0] = prevHeights[lane];
+                if (lane != 0)
+                    neighbourHeights[1] = heights[lane - 1];
+                if (lane != m_numberOfLanes - 1)
+                    neighbourHeights[2] = heights[lane + 1];
+                //Generate the tiles
+                m_tiles[tileIndex * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_indoorPrefab, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset, neighbourHeights);
             }
+
             //Generate the decorations
             float rand;
             //Make sure this isn't the first row so that the spawners don't have to continually check this
@@ -693,11 +694,13 @@ public struct TileInfo
     /// </summary>
     /// <param name="tilePrefab">The prefab for standard ground</param>
     /// <param name="tileSlope">The prefab for slopes</param>
+    /// <param name="tileIndoor">The prefab for indoors</param>
     /// <param name="laneWidth">The width of a tile</param>
     /// <param name="tileHeight">The height of a tile</param>
     /// <param name="tileLength">The length of a tile</param>
     /// <param name="posOffset">The position offset of the tile from the origin</param>
-    public void GenerateTiles(GameObject tilePrefab, GameObject tileSlope, float laneWidth, float tileHeight, float tileLength, Vector3 posOffset)
+    /// <param name="neighbourHeights">The heights of neighbouring tiles in order, previous, left, right</param>
+    public void GenerateTiles(GameObject tilePrefab, GameObject tileSlope, GameObject tileIndoor, float laneWidth, float tileHeight, float tileLength, Vector3 posOffset, int[] neighbourHeights)
     {   //Make sure the tile has not finished its generation before continuing
         if (_isGenerated)
         {
@@ -714,9 +717,9 @@ public struct TileInfo
         Renderer r = obj.GetComponent<Renderer>();
         r.material.SetTextureScale("_WallTex", new Vector2(1, _isRamp ? _height : _height + 1));
         r.material.SetTextureScale("_MainTex", new Vector2(1, tileLength));
-        //Temporary debugging for doors
-        if (_hasIndoors)
-            r.material.SetColor("_Color", Color.green);
+        r.material.SetFloat("_Back", (neighbourHeights[0] + 0.5f) * tileHeight + posOffset.y);
+        r.material.SetFloat("_Left", (neighbourHeights[1] + 0.5f) * tileHeight + posOffset.y);
+        r.material.SetFloat("_Right", (neighbourHeights[2] + 0.5f) * tileHeight + posOffset.y);
         //Store it
         m_objectsOnTile.Add(obj);
         //If we have a ramp, create it
@@ -727,6 +730,14 @@ public struct TileInfo
             //Scale the ramp to fit the tile
             obj.transform.localScale = new Vector3(laneWidth, tileHeight, tileLength);
             //Store it
+            m_objectsOnTile.Add(obj);
+        }
+
+        if (_hasIndoors)
+        {
+            obj = GameObject.Instantiate(tileIndoor, new Vector3(laneWidth * _lane + posOffset.x, _indoorHeight * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+            obj.transform.localScale = new Vector3(laneWidth, tileHeight, tileLength);
+
             m_objectsOnTile.Add(obj);
         }
         //The tile has been generated and cannot be edited

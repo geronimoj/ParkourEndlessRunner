@@ -572,6 +572,8 @@ public class Player : MonoBehaviour
         _score = 0;
         //Set the starting lane for the player
         _prevLane = _lane = _lg.NumberOfLanes / 2; ;
+        //Reset the players layer masks for moving as they will need to be redone if they die indoors
+        _pc.colInfo.ground = LayerMask.GetMask("Default", "Indoors", "OutDoors");
         //Set the position of the player to spawn ever so slightly above the ground
         Vector3 pos;
         pos.y = _pc.colInfo.LowerHeight + _pc.colInfo.CollisionOffset * 2 + _lg.LayerHeight * 1.5f + _lg.GenerateOffset.y;

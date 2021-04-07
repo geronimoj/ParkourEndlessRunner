@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4714287412830020455}
   - component: {fileID: 8091061211182335987}
   - component: {fileID: 5658659159592068949}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: default
   m_TagString: Ramp
   m_Icon: {fileID: 0}
@@ -105,7 +105,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7046893177910537077}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Slope
   m_TagString: Untagged
   m_Icon: {fileID: 0}

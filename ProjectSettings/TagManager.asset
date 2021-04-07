@@ -9,6 +9,7 @@ TagManager:
   - Vaultable
   - ScoreText
   - Model
+  - Indoors
   layers:
   - Default
   - TransparentFX
@@ -19,8 +20,8 @@ TagManager:
   - 
   - 
   - Model
-  - 
-  - 
+  - Indoors
+  - OutDoors
   - 
   - 
   - 
