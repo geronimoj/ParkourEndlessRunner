@@ -190,6 +190,10 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField]
     private float m_probabilityToSpawnDoor = 0.1f;
 
+    [Tooltip("How many rows the player must be infront of the front most tile to allow for the front row to be deleted")]
+    [SerializeField]
+    private uint m_deleteTilesAtRow = 5;
+
     [Space]
     [Header("Indoors Info")]
 
@@ -447,7 +451,7 @@ public class LevelGenerator : MonoBehaviour
             //Generate the decorations
             float rand;
             //Make sure this isn't the first row so that the spawners don't have to continually check this
-            if (i != 0)
+            if (tileIndex != 0)
                 //0. Loop over the decorations
                 for (int d = 0; d < m_decorations.Length; d++)
                 {
@@ -503,7 +507,7 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void FixedUpdate()
     {   //Keep generating the world
-        if (_player.position.z > (_frontTilePos + 1) * m_tileLength)
+        if (_player.position.z > (_frontTilePos + m_deleteTilesAtRow) * m_tileLength)
         {   //Delete the front and generate a new tile
             _frontTilePos++;
             DeleteFrontTiles(1);
@@ -527,8 +531,8 @@ public class LevelGenerator : MonoBehaviour
                     m_tiles[i].m_objectsOnTile[tileObj].transform.position = p;
                 }
             //Reset the length values so iterators remain valid and we don't generate 100 units in front of the level. That would be bad
-            _frontTilePos = 0;
-            _currentLength = m_tiles.Count / (int)m_numberOfLanes;
+            _frontTilePos = -((int)m_deleteTilesAtRow - 1);
+            _currentLength = (m_tiles.Count / (int)m_numberOfLanes) - ((int)m_deleteTilesAtRow - 1);
             //Re-sync the transforms so the players raycasts do not miss
             Physics.SyncTransforms();
         }

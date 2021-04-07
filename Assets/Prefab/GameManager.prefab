@@ -79,7 +79,8 @@ MonoBehaviour:
     m_spawnChance: 1
   m_probabilityToChangeHeight: 0.5
   m_probabilityForNonRequiredRamps: 0.2
-  m_probabilityToSpawnDoor: 0.1
+  m_probabilityToSpawnDoor: 0.3
+  m_deleteTilesAtRow: 5
   minIndoorLength: 2
 --- !u!114 &5562916684381745588
 MonoBehaviour:
