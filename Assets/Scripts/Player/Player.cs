@@ -280,6 +280,10 @@ public class Player : MonoBehaviour
     /// </summary>
     private float trueGravity = 0;
     /// <summary>
+    /// The time the player began running
+    /// </summary>
+    private float startTime = 0;
+    /// <summary>
     /// Returns true if the player is dead
     /// </summary>
     public bool IsDead => _r.RagdollOn;
@@ -294,6 +298,10 @@ public class Player : MonoBehaviour
     /// </summary>
     [Tooltip("The model that should be swapped to when calling SwapModel")]
     public static ModelInfo modelToSwapTo = new ModelInfo();
+    /// <summary>
+    /// The index of the players current model
+    /// </summary>
+    public static int s_modelIndex = 0;
     /// <summary>
     /// Gets references to components
     /// </summary>
@@ -408,6 +416,10 @@ public class Player : MonoBehaviour
                 doRagdoll = true;
                 //Dissable the speed lines
                 _particleTransform.gameObject.SetActive(false);
+                //Store the time the run lasted for
+                startTime = Time.time - startTime;
+                //Store the highScore
+                Highscore.AddScore(new Highscore((uint)s_modelIndex, (int)Score, startTime));
             }
         }
 
@@ -587,6 +599,8 @@ public class Player : MonoBehaviour
         m_inAnimation = false;
         _cc.FollowHead = false;
         _swapLane = 0;
+        //Store the time the player started running
+        startTime = Time.time;
     }
     /// <summary>
     /// Swaps the model to the model in Model To Swap To

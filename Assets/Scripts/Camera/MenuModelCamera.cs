@@ -59,7 +59,11 @@ public class MenuModelCamera : MonoBehaviour
         ModelInfo mi = _mmm.GetModel(_modelIndex);
         //Make sure the model is valid before swapping to it
         if (mi.IsValid)
+        {
             Player.modelToSwapTo = mi;
+            //Store the index of the model
+            Player.s_modelIndex = _modelIndex;
+        }
         else
             Debug.LogError("Model info for model: " + mi + " is incomplete.");
     }
