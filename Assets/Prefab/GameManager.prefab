@@ -59,8 +59,8 @@ MonoBehaviour:
   m_slopePrefab: {fileID: 7674213680519279055, guid: 9bec8ac7641609f42bee86402b634e6b, type: 3}
   m_indoorPrefab: {fileID: 93750473928880499, guid: 7cb60c18e9925d1419a23741c5a56ddc, type: 3}
   m_tiles: []
-  _minSpaceBetweenObstacles: 4
-  _maxSpaceBetweenObstacles: 6
+  _minSpaceBetweenObstacles: 3
+  _maxSpaceBetweenObstacles: 5
   _obstacles:
   - m_prefab: {fileID: 4733393988366318330, guid: 9130f5843d6860741bd1153abf191de2, type: 3}
     _spawner: {fileID: 11400000, guid: 99a5ab6734356de4c9afb0436cfe6789, type: 2}

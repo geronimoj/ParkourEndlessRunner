@@ -343,10 +343,15 @@ public class LevelGenerator : MonoBehaviour
                 //If the previous tile was indoors, we need to update this tile
                 //If we haven't met the minimum distance we want to set the indoor height
                 //Once we have met the minimum distance, we only need to continue the indoor section until the height drops below the indoor height
-                if (prevTile.HasIndoors && (prevTile.IndoorLength < minIndoorLength || height > prevTile.IndoorHeight))
-                    //This works for making a strait line through the environment for an indoor section
-                    tile.SetIndoorHeight(prevTile.IndoorHeight, prevTile.IndoorLength + 1);
-                
+                if (prevTile.HasIndoors)
+                {
+                    if (prevTile.IndoorLength < minIndoorLength || height > prevTile.IndoorHeight)
+                        //This works for making a strait line through the environment for an indoor section
+                        tile.SetIndoorHeight(prevTile.IndoorHeight, prevTile.IndoorLength + 1);
+                    else
+                        //Otherwise, this must be an exit so set the height to not be an imminent death drop
+                        tile.Height = prevTile.IndoorHeight;
+                }
                 //Store the height and tile
                 heights[lane] = (int)tile.Height;
                 m_tiles.Add(tile);
@@ -400,6 +405,10 @@ public class LevelGenerator : MonoBehaviour
                         //will be treated as having equal height so it can be counted as a valid lane
                         heights[lane]--;
                     }
+                    //Even if there is a valid path, check if we want to spawn a door
+                    else if (heightChange > 0 && !current.HasIndoors && prob <= m_probabilityToSpawnDoor)
+                        //Set the height for the indoor section
+                        current.SetIndoorHeight((uint)prevHeights[lane], 0);
                     m_tiles[tileIndex * (int)m_numberOfLanes + lane] = current;
                 }
             //Generate Obstacles
@@ -411,11 +420,15 @@ public class LevelGenerator : MonoBehaviour
                     int currentTile = tileIndex * (int)m_numberOfLanes + lane;
                     if (m_tiles[currentTile].IsRamp)
                         continue;
+                    int prevTile = currentTile - (int)m_numberOfLanes;
                     //Decrement the lane timers, if they are already 0, attempt to spawn an obstacle
                     if (_laneObstacleTimer[lane] != 0)
                         _laneObstacleTimer[lane]--;
                     //If they have reached 0, check if we can spawn an obstacle on that tile
-                    else if (!m_tiles[currentTile - (int)m_numberOfLanes].IsRamp)
+                    //1. Make sure the previous tile isn' a ramp
+                    else if (!m_tiles[prevTile].IsRamp
+                        //2. Make sure the tile isn't indoors and, if it is, that out height is different to the height of the indoor tile
+                        && (!m_tiles[prevTile].HasIndoors || m_tiles[prevTile].IndoorHeight != m_tiles[currentTile].Height))
                     {
                         //Select a random obstacle to spawn
                         int obstIndex = Random.Range(0, _obstacles.Length);

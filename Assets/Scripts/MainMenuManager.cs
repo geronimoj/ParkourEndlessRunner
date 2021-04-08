@@ -174,6 +174,9 @@ public class MainMenuManager : Manager
     {
         Highscore.SaveScores();
         Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
     /// <summary>
     /// Returns the ModelInfo of the selected model
