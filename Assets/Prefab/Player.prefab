@@ -91,7 +91,7 @@ MonoBehaviour:
   _rollReactionTime: 0.3
   _coyoteTime: 0.2
   _fallKillVelocity: 10
-  _vaultRange: 2.5
+  _vaultRange: 3
   _baseScoreMultiplier: 100
   defaultModelInfo:
     _modelAvatar: {fileID: 9000000, guid: 2dc526a87c49416478b13f971cef333c, type: 3}

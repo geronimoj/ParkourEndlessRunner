@@ -200,10 +200,20 @@ public class LevelGenerator : MonoBehaviour
     [Tooltip("The minimum length of an indoor section")]
     [SerializeField]
     private uint minIndoorLength = 2;
+
+    [SerializeField]
+    private int _minDistBetweenIndoorObstacle = 2;
+
+    [SerializeField]
+    private int _maxDistBetweenIndoorObstacle = 2;
     /// <summary>
     /// An array to store how long until a lane can spawn an obstacle
     /// </summary>
     private uint[] _laneObstacleTimer = new uint[0];
+    /// <summary>
+    /// An array that stores how long until a lane can spawn an obstacle indoors
+    /// </summary>
+    private uint[] _indoorObstacleTimer = new uint[0];
     /// <summary>
     /// The current length of the level. Used when extending the level.
     /// </summary>
@@ -286,9 +296,14 @@ public class LevelGenerator : MonoBehaviour
         {
             if (_laneObstacleTimer.Length != m_numberOfLanes)
                 _laneObstacleTimer = new uint[m_numberOfLanes];
+            if (_indoorObstacleTimer.Length != m_numberOfLanes)
+                _indoorObstacleTimer = new uint[m_numberOfLanes];
 
             for (int lane = 0; lane < m_numberOfLanes; lane++)
+            {
                 _laneObstacleTimer[lane] = (uint)Random.Range((int)_minSpaceBetweenObstacles, (int)_maxSpaceBetweenObstacles);
+                _indoorObstacleTimer[lane] = (uint)Random.Range(_minDistBetweenIndoorObstacle, _maxDistBetweenIndoorObstacle);
+            }
         }
         //Just preparing some variables for later
         GameObject obstacle;
@@ -448,6 +463,39 @@ public class LevelGenerator : MonoBehaviour
                         _laneObstacleTimer[lane] = (uint)Random.Range((int)_minSpaceBetweenObstacles, (int)_maxSpaceBetweenObstacles);
                     }
                 }
+            //Check for indoor obstacles
+            if (!makeFlat && _obstacles.Length != 0)
+                //Decrement the timers if they haven't already reached 0
+                for (int lane = 0; lane < m_numberOfLanes; lane++)
+                {
+                    int currentTile = tileIndex * (int)m_numberOfLanes + lane;
+                    if (!m_tiles[currentTile].HasIndoors)
+                        continue;
+                    int prevTile = currentTile - (int)m_numberOfLanes;
+
+                    if (_indoorObstacleTimer[lane] != 0)
+                        _indoorObstacleTimer[lane]--;
+                    //Make sure the tile 2 back is indoors
+                    else if (m_tiles[prevTile - (int)m_numberOfLanes].HasIndoors)
+                    {
+                        int obstIndex = Random.Range(0, _obstacles.Length);
+                        obstacle = _obstacles[obstIndex].m_prefab;
+                        //Get a reference to the tile to avoid more indexing
+                        TileInfo t = m_tiles[currentTile];
+                        //Check if the obstacle is valid
+                        if (_obstacles[obstIndex].Spawner != null && obstacle != null)
+                            //Spawn the obstacle
+                            _obstacles[obstIndex].Spawner.Spawn(obstacle, in m_tiles, (uint)currentTile,
+                                //Since the tile hasn't yet been created, we have to re-calculate the position of the tile. This could be optimised by the position of the tile being calculated in initialisation of the tile
+                                //And being stored on the tile. LOOK INTO THIS LATER
+                                new Vector3(m_laneWidth * t.Lane + m_generateOffset.x, (t.IndoorHeight + 0.5f) * m_layerHeight + m_generateOffset.y, t.ForwardPoint * m_tileLength + m_generateOffset.z),
+                                m_laneWidth, m_tileLength, m_layerHeight, m_numberOfLanes);
+
+                        //Reset the timer
+                        _indoorObstacleTimer[lane] = (uint)Random.Range((int)_minDistBetweenIndoorObstacle, (int)_maxDistBetweenIndoorObstacle);
+                    }
+                }
+
             //Actually generate the lanes boxes and stuff
             for (int lane = 0; lane < m_numberOfLanes; lane++)
             {   //Get the neighbouring tile heights in the specified order

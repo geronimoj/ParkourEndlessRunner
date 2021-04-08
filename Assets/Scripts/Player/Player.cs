@@ -481,8 +481,8 @@ public class Player : MonoBehaviour
     {   //Jump or Vault
         if (onGround && !m_inAnimation && _jump)
         {
-            //Perform a raycast forwards to see if we detect a vaultable object
-            if (Physics.Raycast(_pc.colInfo.GetLowerPoint(), Vector3.forward, out RaycastHit hit, _pc.colInfo.TrueRadius + _vaultRange)
+            //Perform a raycast forwards to see if we detect a vaultable object                                                     //Vault obstacles exist on the default layer
+            if (Physics.Raycast(_pc.colInfo.GetLowerPoint(), Vector3.forward, out RaycastHit hit, _pc.colInfo.TrueRadius + _vaultRange, LayerMask.GetMask("Default"))
                 //If the hit object is vaultable, do a vault
                 && hit.transform.CompareTag("Vaultable"))
             {   //Ignore the collider of the vaultable object as otherwise we need to freeze the players Y and change their collider

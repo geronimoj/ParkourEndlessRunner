@@ -82,6 +82,8 @@ MonoBehaviour:
   m_probabilityToSpawnDoor: 0.3
   m_deleteTilesAtRow: 5
   minIndoorLength: 2
+  _minDistBetweenIndoorObstacle: 3
+  _maxDistBetweenIndoorObstacle: 4
 --- !u!114 &5562916684381745588
 MonoBehaviour:
   m_ObjectHideFlags: 0
