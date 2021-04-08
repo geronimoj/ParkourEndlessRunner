@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 /// <summary>
 /// Controls everything player related
 /// </summary>
@@ -103,6 +104,8 @@ public class Player : MonoBehaviour
     /// Store a static reference to this game to make it easier to read and write to the player
     /// </summary>
     public static Player player = null;
+
+    public UnityEvent OnLaneChange;
     /// <summary>
     /// The speed at which the player runs in global units per second
     /// </summary>
@@ -421,6 +424,7 @@ public class Player : MonoBehaviour
                 //Store the highScore
                 Highscore.AddScore(new Highscore((uint)s_modelIndex, (int)Score, startTime));
             }
+            OnLaneChange.Invoke();
         }
 
         //If the player died, ragdoll them and don't move
@@ -454,11 +458,13 @@ public class Player : MonoBehaviour
             {
                 _lane--;
                 t_laneSwapTimer = 0;
+                OnLaneChange.Invoke();
             }
             else if (_lane != _lg.NumberOfLanes - 1 && _swapLane > 0)
             {
                 _lane++;
                 t_laneSwapTimer = 0;
+                OnLaneChange.Invoke();
             }
         }
         //Increment the timer
@@ -601,6 +607,8 @@ public class Player : MonoBehaviour
         _swapLane = 0;
         //Store the time the player started running
         startTime = Time.time;
+
+        OnLaneChange.Invoke();
     }
     /// <summary>
     /// Swaps the model to the model in Model To Swap To

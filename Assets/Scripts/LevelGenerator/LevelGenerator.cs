@@ -158,8 +158,15 @@ public class LevelGenerator : MonoBehaviour
     [Tooltip("The prefab used for generating curbs that appear when a layer drop down")]
     [SerializeField]
     private Decoration[] m_decorations = new Decoration[0];
+    /// <summary>
+    /// The rows that will be enabled +- the players current row to improve performance
+    /// </summary>
     [Space]
     [Header("Level Generation")]
+    
+    [Tooltip("The rows that will be enabled +- the players current row to improve performance")]
+    [SerializeField]
+    private int m_disableRowFrom = 7;
     /// <summary>
     /// The probability for the height of a tile to change when generated
     /// </summary>
@@ -189,21 +196,29 @@ public class LevelGenerator : MonoBehaviour
     [Range(0, 1)]
     [SerializeField]
     private float m_probabilityToSpawnDoor = 0.1f;
-
+    /// <summary>
+    /// How many rows the player must pass before that row gets deleted
+    /// </summary>
     [Tooltip("How many rows the player must be infront of the front most tile to allow for the front row to be deleted")]
     [SerializeField]
     private uint m_deleteTilesAtRow = 5;
-
+    /// <summary>
+    /// The minimum length of an indoor section
+    /// </summary>
     [Space]
     [Header("Indoors Info")]
-
+    
     [Tooltip("The minimum length of an indoor section")]
     [SerializeField]
     private uint minIndoorLength = 2;
-
+    /// <summary>
+    /// The minimum distance between two indoor obstacles
+    /// </summary>
     [SerializeField]
     private int _minDistBetweenIndoorObstacle = 2;
-
+    /// <summary>
+    /// The maximum distance between two indoor obstacles
+    /// </summary>
     [SerializeField]
     private int _maxDistBetweenIndoorObstacle = 2;
     /// <summary>
@@ -250,6 +265,7 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void Start()
     {
+        Player.player.OnLaneChange.AddListener(ToggleTiles);
         CreateLevel();
     }
     /// <summary>
@@ -531,9 +547,37 @@ public class LevelGenerator : MonoBehaviour
                     dec.DecorationSpawner.Spawn(dec.m_prefab, m_tiles, i, (uint)tileIndex * m_numberOfLanes,
                         m_numberOfLanes, new TileSize(m_tileLength, m_layerHeight, m_laneWidth), m_generateOffset);
                 }
+            //Loop over the new tiles and disable those that should not be rendered
+            for (int lane = 0; lane < m_numberOfLanes; lane++)
+            {   //Is the tile too far to the left
+                if (lane < Player.player.CurrentLane - m_disableRowFrom
+                    //Is the tile too far to the right
+                    || lane > Player.player.CurrentLane + m_disableRowFrom)
+                    //Toggle the tile off
+                    m_tiles[tileIndex * (int)m_numberOfLanes + lane].Toggle(false);
+            }
         }
 
         _currentLength += (int)layersToGenerate;
+    }
+
+    void ToggleTiles()
+    {
+        bool toggleOn;
+        int numberOfRows = _currentLength - _frontTilePos;
+        //Loop over the lanes and find the valid lanes
+        for (int lane = 0; lane < m_numberOfLanes; lane++)
+        {   //Is the tile too far to the left
+            if (lane < Player.player.CurrentLane - m_disableRowFrom
+                //Is the tile too far to the right
+                || lane > Player.player.CurrentLane + m_disableRowFrom)
+                toggleOn = false;
+            else
+                toggleOn = true;
+
+            for (int i = 0; i < numberOfRows; i++)
+                m_tiles[(int)m_numberOfLanes * i + lane].Toggle(toggleOn);
+        }
     }
     /// <summary>
     /// Deletes all tiles and the objects they contain
@@ -825,6 +869,14 @@ public struct TileInfo
     public void AddObstacle(ref GameObject obstacle)
     {   //Store the object
         m_objectsOnTile.Add(obstacle);
+    }
+    /// <summary>
+    /// Toggles the objects on the tile
+    /// </summary>
+    public void Toggle(bool on)
+    {
+        foreach (GameObject g in m_objectsOnTile)
+            g.SetActive(on);
     }
 }
 /// <summary>
