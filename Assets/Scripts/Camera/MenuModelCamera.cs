@@ -10,6 +10,17 @@ public class MenuModelCamera : MonoBehaviour
     /// The index of the model that should be visualised in the window
     /// </summary>
     private int _modelIndex = 0;
+
+    public int ModelIndex
+    {
+        get => _modelIndex;
+        set
+        {
+            value = Mathf.Clamp(value, 0 , (int)_mmm.NumberOfPlayerModels - 1);
+
+            _modelIndex = value;
+        }
+    }
     /// <summary>
     /// A reference to the main menu manager to get the model spawn position and spacing
     /// </summary>

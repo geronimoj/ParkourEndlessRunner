@@ -20,10 +20,14 @@ public class HighscoreUI : MonoBehaviour
 
     public TMPro.TextMeshProUGUI m_durationText = null;
 
+    public Button m_deleteButton = null;
+
     [SerializeField]
     private GameObject m_modelCameraPrefab = null;
 
     private GameObject _modelCamera = null;
+
+    public GameObject ModelCamera => _modelCamera;
 
     private void Start()
     {
@@ -38,7 +42,14 @@ public class HighscoreUI : MonoBehaviour
                 m_scoreText.text = m_hScore.Score.ToString();
             //Write the duration text if its assigned
             if (m_durationText)
-                m_durationText.text = m_hScore.Duration.ToString();
+                m_durationText.text = m_hScore.Duration.ToString("n2");
+            //If we have a delete button
+            if (m_deleteButton)
+            {   //Remove all listeners to avoid listeners being carried from prevsious uses of this UI component
+                m_deleteButton.onClick.RemoveAllListeners();
+                //Add our highscore to be deleted
+                m_deleteButton.onClick.AddListener(() => { Highscore.RemoveScore(m_hScore); gameObject.SetActive(false); });
+            }
             //Render the models head if its assigned
             if (m_modelHead)
             {
@@ -68,8 +79,7 @@ public class HighscoreUI : MonoBehaviour
                     MenuModelCamera modCam = _modelCamera.GetComponent<MenuModelCamera>();
                     //Cycle to the correct model
                     if (modCam)
-                        for (int i = 0; i < m_hScore.Model; i++)
-                            modCam.CycleRight();
+                        modCam.ModelIndex = (int)m_hScore.Model;
                     //Load the player models if they haven't already been loaded
                     if (!MainMenuManager.s_modelsLoaded)
                         //This is sort of expected to be a menu thing so we just one line it and hope they don't try to use this elsewhere
