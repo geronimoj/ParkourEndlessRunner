@@ -653,7 +653,7 @@ public class LevelGenerator : MonoBehaviour
             _frontTilePos = -((int)m_deleteTilesAtRow - 1);
             _currentLength = (m_tiles.Count / (int)m_numberOfLanes) - ((int)m_deleteTilesAtRow - 1);
             //Re-sync the transforms so the players raycasts do not miss
-            Physics.SyncTransforms();
+            //Physics.SyncTransforms();
         }
     }
     /// <summary>
