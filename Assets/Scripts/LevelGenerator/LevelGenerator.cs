@@ -295,6 +295,7 @@ public class LevelGenerator : MonoBehaviour
     }
     /// <summary>
     /// Generates a section of the world
+    /// This needs to be optimised
     /// </summary>
     /// <param name="layersToGenerate">The number of layers to generate</param>
     /// <param name="regenerate">Wether or not the level should be completely rengerated or if new layers should be added</param>
@@ -854,7 +855,7 @@ public struct TileInfo
             //Store it
             m_objectsOnTile.Add(obj);
         }
-
+        //Create an indoor object if its needed
         if (_hasIndoors)
         {
             obj = GameObject.Instantiate(tileIndoor, new Vector3(laneWidth * _lane + posOffset.x, _indoorHeight * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);
