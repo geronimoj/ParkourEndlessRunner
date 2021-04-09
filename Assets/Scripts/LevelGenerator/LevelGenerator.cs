@@ -414,7 +414,7 @@ public class LevelGenerator : MonoBehaviour
                     //If not, we make this tile a ramp and reduce its height
                     if (validLanes == 0)
                     {   //Check if we should spawn a door to an indoor section
-                        if (!current.HasIndoors && prob < m_probabilityToSpawnDoor)
+                        if (!current.HasIndoors && m_tiles[(tileIndex - 2) * (int)m_numberOfLanes + lane].Height == prevHeights[lane] && prob < m_probabilityToSpawnDoor)
                             //Set the height for the indoor section
                             current.SetIndoorHeight((uint)prevHeights[lane], 0);
                         //Otherwise spawn a ramp
@@ -437,9 +437,11 @@ public class LevelGenerator : MonoBehaviour
                         heights[lane]--;
                     }
                     //Even if there is a valid path, check if we want to spawn a door
-                    else if (heightChange > 0 && !current.HasIndoors && prob <= m_probabilityToSpawnDoor)
+                                            //Make sure the previous lane and lane before that have equal heights
+                    else if (heightChange > 0 && m_tiles[(tileIndex - 2) * (int)m_numberOfLanes + lane].Height == prevHeights[lane] && !current.HasIndoors && prob <= m_probabilityToSpawnDoor)
                         //Set the height for the indoor section
                         current.SetIndoorHeight((uint)prevHeights[lane], 0);
+
                     m_tiles[tileIndex * (int)m_numberOfLanes + lane] = current;
                 }
             //Generate Obstacles
@@ -560,21 +562,32 @@ public class LevelGenerator : MonoBehaviour
 
         _currentLength += (int)layersToGenerate;
     }
-
+    /// <summary>
+    /// Toggle the tiles on or off depending on the lane the player is in
+    /// </summary>
     void ToggleTiles()
     {
         bool toggleOn;
         int numberOfRows = _currentLength - _frontTilePos;
+        //Calculate the range of lanes we need to disable or enable
+        int startLane = (int)Player.player.CurrentLane - m_disableRowFrom - 2;
+        int endLane = (int)Player.player.CurrentLane + m_disableRowFrom + 2;
+        int left = startLane + 2;
+        int right = endLane - 2;
+        if (startLane < 0)
+            startLane = 0;
+        if (endLane >= m_numberOfLanes)
+            endLane = (int)m_numberOfLanes - 1;
         //Loop over the lanes and find the valid lanes
-        for (int lane = 0; lane < m_numberOfLanes; lane++)
+        for (int lane = startLane; lane <= endLane; lane++)
         {   //Is the tile too far to the left
-            if (lane < Player.player.CurrentLane - m_disableRowFrom
+            if (lane < left
                 //Is the tile too far to the right
-                || lane > Player.player.CurrentLane + m_disableRowFrom)
+                || lane > right)
                 toggleOn = false;
             else
                 toggleOn = true;
-
+            //This could be optimised to only update the lanes +2 -2 from the edge of the tiles for even greater performance
             for (int i = 0; i < numberOfRows; i++)
                 m_tiles[(int)m_numberOfLanes * i + lane].Toggle(toggleOn);
         }

@@ -44,6 +44,8 @@ public class Door : MonoBehaviour
         Shader.SetGlobalVector("_AABBP2", transform.position - _AabbScale);
         //Open the door
         transform.parent.GetComponentInChildren<DoorOpen>().Open();
+
+        Player.player.EnterDoor();
     }
     /// <summary>
     /// Undos any changes to the AABB to avoid is existing between multiple loops
@@ -53,5 +55,6 @@ public class Door : MonoBehaviour
     {   //Undo our AABB so that it doesn't persist between enters and exits and looks weird
         Shader.SetGlobalVector("_AABBP1", Vector3.zero);
         Shader.SetGlobalVector("_AABBP2", Vector3.zero);
+        Player.player.ExitDoor();
     }
 }

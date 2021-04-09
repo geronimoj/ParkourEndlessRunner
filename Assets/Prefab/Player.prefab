@@ -84,10 +84,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08d37e420eda50a499bfc5a085bf9600, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnLaneChange:
+    m_PersistentCalls:
+      m_Calls: []
   _runSpeed: 10
   _jumpVelocity: 7
   _stepHeight: 0.35
-  _laneSwapTime: 0.1
+  _laneSwapTime: 0.15
   _rollReactionTime: 0.3
   _coyoteTime: 0.2
   _fallKillVelocity: 10

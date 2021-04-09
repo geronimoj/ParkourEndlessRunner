@@ -570,6 +570,10 @@ public class Player : MonoBehaviour
         _cc.FollowHead = true;
         m_inAnimation = true;
     }
+
+    public void EnterDoor() => m_inAnimation = true;
+
+    public void ExitDoor() => m_inAnimation = false;
     /// <summary>
     /// Resets the players position, score, ragdoll state, animation and input variables
     /// </summary>
@@ -607,8 +611,6 @@ public class Player : MonoBehaviour
         _swapLane = 0;
         //Store the time the player started running
         startTime = Time.time;
-
-        OnLaneChange.Invoke();
     }
     /// <summary>
     /// Swaps the model to the model in Model To Swap To
