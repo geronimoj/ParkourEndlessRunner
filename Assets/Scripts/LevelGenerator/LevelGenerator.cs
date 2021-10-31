@@ -524,6 +524,16 @@ public class LevelGenerator : MonoBehaviour
                     p = m_tiles[i].m_objectsOnTile[tileObj].transform.position;
                     p.z -= m_distanceUntilLoop;
                     m_tiles[i].m_objectsOnTile[tileObj].transform.position = p;
+
+                    //FOR SOME REASON, TURNING COLLIDERS OFF AND ON AGAIN FIXES THE (Sometimes) FALLING THROUGH THE GROUND ISSUE!!!???????
+
+                    Collider col = m_tiles[i].m_objectsOnTile[tileObj].GetComponent<Collider>();
+
+                    if (col)
+                    {
+                        col.enabled = false;
+                        col.enabled = true;
+                    }
                 }
             //Reset the length values so iterators remain valid and we don't generate 100 units in front of the level. That would be bad
             _frontTilePos = 0;
