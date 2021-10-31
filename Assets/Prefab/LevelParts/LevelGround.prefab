@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2247504188332206872}
   - component: {fileID: 7755532884386958870}
   - component: {fileID: 4899231995703379014}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: LevelGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}

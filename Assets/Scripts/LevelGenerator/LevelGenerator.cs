@@ -118,6 +118,12 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField]
     private GameObject m_slopePrefab = null;
     /// <summary>
+    /// Prefab used for the indoors sections
+    /// </summary>
+    [Tooltip("The prefab used for generating slopes. Angle of slope should be 45 degrees as it is scaled up upon generation")]
+    [SerializeField]
+    private GameObject m_indoorPrefab = null;
+    /// <summary>
     /// A list of all active tiles for debugging purposes
     /// </summary>
     //Show for debugging purposes
@@ -152,8 +158,15 @@ public class LevelGenerator : MonoBehaviour
     [Tooltip("The prefab used for generating curbs that appear when a layer drop down")]
     [SerializeField]
     private Decoration[] m_decorations = new Decoration[0];
+    /// <summary>
+    /// The rows that will be enabled +- the players current row to improve performance
+    /// </summary>
     [Space]
     [Header("Level Generation")]
+    
+    [Tooltip("The rows that will be enabled +- the players current row to improve performance")]
+    [SerializeField]
+    private int m_disableRowFrom = 7;
     /// <summary>
     /// The probability for the height of a tile to change when generated
     /// </summary>
@@ -183,17 +196,39 @@ public class LevelGenerator : MonoBehaviour
     [Range(0, 1)]
     [SerializeField]
     private float m_probabilityToSpawnDoor = 0.1f;
-
+    /// <summary>
+    /// How many rows the player must pass before that row gets deleted
+    /// </summary>
+    [Tooltip("How many rows the player must be infront of the front most tile to allow for the front row to be deleted")]
+    [SerializeField]
+    private uint m_deleteTilesAtRow = 5;
+    /// <summary>
+    /// The minimum length of an indoor section
+    /// </summary>
     [Space]
     [Header("Indoors Info")]
-
+    
     [Tooltip("The minimum length of an indoor section")]
     [SerializeField]
     private uint minIndoorLength = 2;
     /// <summary>
+    /// The minimum distance between two indoor obstacles
+    /// </summary>
+    [SerializeField]
+    private int _minDistBetweenIndoorObstacle = 2;
+    /// <summary>
+    /// The maximum distance between two indoor obstacles
+    /// </summary>
+    [SerializeField]
+    private int _maxDistBetweenIndoorObstacle = 2;
+    /// <summary>
     /// An array to store how long until a lane can spawn an obstacle
     /// </summary>
     private uint[] _laneObstacleTimer = new uint[0];
+    /// <summary>
+    /// An array that stores how long until a lane can spawn an obstacle indoors
+    /// </summary>
+    private uint[] _indoorObstacleTimer = new uint[0];
     /// <summary>
     /// The current length of the level. Used when extending the level.
     /// </summary>
@@ -206,8 +241,6 @@ public class LevelGenerator : MonoBehaviour
     /// Store a reference to the players transform for distance and position calculations
     /// </summary>
     private Transform _player;
-
-    public LevelMeshSyncer lms;
     /// <summary>
     /// Initalises some variables
     /// </summary>
@@ -232,6 +265,7 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void Start()
     {
+        Player.player.OnLaneChange.AddListener(ToggleTiles);
         CreateLevel();
     }
     /// <summary>
@@ -261,6 +295,7 @@ public class LevelGenerator : MonoBehaviour
     }
     /// <summary>
     /// Generates a section of the world
+    /// This needs to be optimised
     /// </summary>
     /// <param name="layersToGenerate">The number of layers to generate</param>
     /// <param name="regenerate">Wether or not the level should be completely rengerated or if new layers should be added</param>
@@ -276,14 +311,16 @@ public class LevelGenerator : MonoBehaviour
         //If we are regenerating the level, recalculate the obstacle timers
         if (regenerate)
         {
-            if (lms != null)
-                lms.ResetMesh();
-
             if (_laneObstacleTimer.Length != m_numberOfLanes)
                 _laneObstacleTimer = new uint[m_numberOfLanes];
+            if (_indoorObstacleTimer.Length != m_numberOfLanes)
+                _indoorObstacleTimer = new uint[m_numberOfLanes];
 
             for (int lane = 0; lane < m_numberOfLanes; lane++)
+            {
                 _laneObstacleTimer[lane] = (uint)Random.Range((int)_minSpaceBetweenObstacles, (int)_maxSpaceBetweenObstacles);
+                _indoorObstacleTimer[lane] = (uint)Random.Range(_minDistBetweenIndoorObstacle, _maxDistBetweenIndoorObstacle);
+            }
         }
         //Just preparing some variables for later
         GameObject obstacle;
@@ -338,10 +375,15 @@ public class LevelGenerator : MonoBehaviour
                 //If the previous tile was indoors, we need to update this tile
                 //If we haven't met the minimum distance we want to set the indoor height
                 //Once we have met the minimum distance, we only need to continue the indoor section until the height drops below the indoor height
-                if (prevTile.HasIndoors && (prevTile.IndoorLength < minIndoorLength || height > prevTile.IndoorHeight))
-                    //This works for making a strait line through the environment for an indoor section
-                    tile.SetIndoorHeight(prevTile.IndoorHeight, prevTile.IndoorLength + 1);
-                
+                if (prevTile.HasIndoors)
+                {
+                    if (prevTile.IndoorLength < minIndoorLength || height > prevTile.IndoorHeight)
+                        //This works for making a strait line through the environment for an indoor section
+                        tile.SetIndoorHeight(prevTile.IndoorHeight, prevTile.IndoorLength + 1);
+                    else
+                        //Otherwise, this must be an exit so set the height to not be an imminent death drop
+                        tile.Height = prevTile.IndoorHeight;
+                }
                 //Store the height and tile
                 heights[lane] = (int)tile.Height;
                 m_tiles.Add(tile);
@@ -373,7 +415,7 @@ public class LevelGenerator : MonoBehaviour
                     //If not, we make this tile a ramp and reduce its height
                     if (validLanes == 0)
                     {   //Check if we should spawn a door to an indoor section
-                        if (prob < m_probabilityToSpawnDoor)
+                        if (!current.HasIndoors && m_tiles[(tileIndex - 2) * (int)m_numberOfLanes + lane].Height == prevHeights[lane] && prob < m_probabilityToSpawnDoor)
                             //Set the height for the indoor section
                             current.SetIndoorHeight((uint)prevHeights[lane], 0);
                         //Otherwise spawn a ramp
@@ -395,6 +437,12 @@ public class LevelGenerator : MonoBehaviour
                         //will be treated as having equal height so it can be counted as a valid lane
                         heights[lane]--;
                     }
+                    //Even if there is a valid path, check if we want to spawn a door
+                                            //Make sure the previous lane and lane before that have equal heights
+                    else if (heightChange > 0 && m_tiles[(tileIndex - 2) * (int)m_numberOfLanes + lane].Height == prevHeights[lane] && !current.HasIndoors && prob <= m_probabilityToSpawnDoor)
+                        //Set the height for the indoor section
+                        current.SetIndoorHeight((uint)prevHeights[lane], 0);
+
                     m_tiles[tileIndex * (int)m_numberOfLanes + lane] = current;
                 }
             //Generate Obstacles
@@ -406,11 +454,15 @@ public class LevelGenerator : MonoBehaviour
                     int currentTile = tileIndex * (int)m_numberOfLanes + lane;
                     if (m_tiles[currentTile].IsRamp)
                         continue;
+                    int prevTile = currentTile - (int)m_numberOfLanes;
                     //Decrement the lane timers, if they are already 0, attempt to spawn an obstacle
                     if (_laneObstacleTimer[lane] != 0)
                         _laneObstacleTimer[lane]--;
                     //If they have reached 0, check if we can spawn an obstacle on that tile
-                    else if (!m_tiles[currentTile - (int)m_numberOfLanes].IsRamp)
+                    //1. Make sure the previous tile isn' a ramp
+                    else if (!m_tiles[prevTile].IsRamp
+                        //2. Make sure the tile isn't indoors and, if it is, that out height is different to the height of the indoor tile
+                        && (!m_tiles[prevTile].HasIndoors || m_tiles[prevTile].IndoorHeight != m_tiles[currentTile].Height))
                     {
                         //Select a random obstacle to spawn
                         int obstIndex = Random.Range(0, _obstacles.Length);
@@ -430,23 +482,56 @@ public class LevelGenerator : MonoBehaviour
                         _laneObstacleTimer[lane] = (uint)Random.Range((int)_minSpaceBetweenObstacles, (int)_maxSpaceBetweenObstacles);
                     }
                 }
+            //Check for indoor obstacles
+            if (!makeFlat && _obstacles.Length != 0)
+                //Decrement the timers if they haven't already reached 0
+                for (int lane = 0; lane < m_numberOfLanes; lane++)
+                {
+                    int currentTile = tileIndex * (int)m_numberOfLanes + lane;
+                    if (!m_tiles[currentTile].HasIndoors)
+                        continue;
+                    int prevTile = currentTile - (int)m_numberOfLanes;
+
+                    if (_indoorObstacleTimer[lane] != 0)
+                        _indoorObstacleTimer[lane]--;
+                    //Make sure the tile 2 back is indoors
+                    else if (m_tiles[prevTile - (int)m_numberOfLanes].HasIndoors)
+                    {
+                        int obstIndex = Random.Range(0, _obstacles.Length);
+                        obstacle = _obstacles[obstIndex].m_prefab;
+                        //Get a reference to the tile to avoid more indexing
+                        TileInfo t = m_tiles[currentTile];
+                        //Check if the obstacle is valid
+                        if (_obstacles[obstIndex].Spawner != null && obstacle != null)
+                            //Spawn the obstacle
+                            _obstacles[obstIndex].Spawner.Spawn(obstacle, in m_tiles, (uint)currentTile,
+                                //Since the tile hasn't yet been created, we have to re-calculate the position of the tile. This could be optimised by the position of the tile being calculated in initialisation of the tile
+                                //And being stored on the tile. LOOK INTO THIS LATER
+                                new Vector3(m_laneWidth * t.Lane + m_generateOffset.x, (t.IndoorHeight + 0.5f) * m_layerHeight + m_generateOffset.y, t.ForwardPoint * m_tileLength + m_generateOffset.z),
+                                m_laneWidth, m_tileLength, m_layerHeight, m_numberOfLanes);
+
+                        //Reset the timer
+                        _indoorObstacleTimer[lane] = (uint)Random.Range((int)_minDistBetweenIndoorObstacle, (int)_maxDistBetweenIndoorObstacle);
+                    }
+                }
+
             //Actually generate the lanes boxes and stuff
             for (int lane = 0; lane < m_numberOfLanes; lane++)
-                m_tiles[tileIndex * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset);
-
-            if (lms != null)
-            {
-                int start = tileIndex * (int)m_numberOfLanes;
-                TileInfo[] newTiles = new TileInfo[m_numberOfLanes];
-                for (int lane = 0; lane < newTiles.Length; lane++)
-                    newTiles[lane] = m_tiles[start + lane];
-
-                lms.ExtendLevelMesh(newTiles, prevHeights, m_laneWidth, m_layerHeight, m_tileLength, (int)numberOfLayers);
+            {   //Get the neighbouring tile heights in the specified order
+                int[] neighbourHeights = new int[] { -1, -1, -1 };
+                neighbourHeights[0] = prevHeights[lane];
+                if (lane != 0)
+                    neighbourHeights[1] = heights[lane - 1];
+                if (lane != m_numberOfLanes - 1)
+                    neighbourHeights[2] = heights[lane + 1];
+                //Generate the tiles
+                m_tiles[tileIndex * (int)m_numberOfLanes + lane].GenerateTiles(m_tilePrefab, m_slopePrefab, m_indoorPrefab, m_laneWidth, m_layerHeight, m_tileLength, m_generateOffset, neighbourHeights);
             }
+
             //Generate the decorations
             float rand;
             //Make sure this isn't the first row so that the spawners don't have to continually check this
-            if (i != 0)
+            if (tileIndex != 0)
                 //0. Loop over the decorations
                 for (int d = 0; d < m_decorations.Length; d++)
                 {
@@ -465,9 +550,48 @@ public class LevelGenerator : MonoBehaviour
                     dec.DecorationSpawner.Spawn(dec.m_prefab, m_tiles, i, (uint)tileIndex * m_numberOfLanes,
                         m_numberOfLanes, new TileSize(m_tileLength, m_layerHeight, m_laneWidth), m_generateOffset);
                 }
+            //Loop over the new tiles and disable those that should not be rendered
+            for (int lane = 0; lane < m_numberOfLanes; lane++)
+            {   //Is the tile too far to the left
+                if (lane < Player.player.CurrentLane - m_disableRowFrom
+                    //Is the tile too far to the right
+                    || lane > Player.player.CurrentLane + m_disableRowFrom)
+                    //Toggle the tile off
+                    m_tiles[tileIndex * (int)m_numberOfLanes + lane].Toggle(false);
+            }
         }
 
         _currentLength += (int)layersToGenerate;
+    }
+    /// <summary>
+    /// Toggle the tiles on or off depending on the lane the player is in
+    /// </summary>
+    void ToggleTiles()
+    {
+        bool toggleOn;
+        int numberOfRows = _currentLength - _frontTilePos;
+        //Calculate the range of lanes we need to disable or enable
+        int startLane = (int)Player.player.CurrentLane - m_disableRowFrom - 2;
+        int endLane = (int)Player.player.CurrentLane + m_disableRowFrom + 2;
+        int left = startLane + 2;
+        int right = endLane - 2;
+        if (startLane < 0)
+            startLane = 0;
+        if (endLane >= m_numberOfLanes)
+            endLane = (int)m_numberOfLanes - 1;
+        //Loop over the lanes and find the valid lanes
+        for (int lane = startLane; lane <= endLane; lane++)
+        {   //Is the tile too far to the left
+            if (lane < left
+                //Is the tile too far to the right
+                || lane > right)
+                toggleOn = false;
+            else
+                toggleOn = true;
+            //This could be optimised to only update the lanes +2 -2 from the edge of the tiles for even greater performance
+            for (int i = 0; i < numberOfRows; i++)
+                m_tiles[(int)m_numberOfLanes * i + lane].Toggle(toggleOn);
+        }
     }
     /// <summary>
     /// Deletes all tiles and the objects they contain
@@ -502,7 +626,7 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     private void FixedUpdate()
     {   //Keep generating the world
-        if (_player.position.z > (_frontTilePos + 1) * m_tileLength)
+        if (_player.position.z > (_frontTilePos + m_deleteTilesAtRow) * m_tileLength)
         {   //Delete the front and generate a new tile
             _frontTilePos++;
             DeleteFrontTiles(1);
@@ -536,10 +660,10 @@ public class LevelGenerator : MonoBehaviour
                     }
                 }
             //Reset the length values so iterators remain valid and we don't generate 100 units in front of the level. That would be bad
-            _frontTilePos = 0;
-            _currentLength = m_tiles.Count / (int)m_numberOfLanes;
+            _frontTilePos = -((int)m_deleteTilesAtRow - 1);
+            _currentLength = (m_tiles.Count / (int)m_numberOfLanes) - ((int)m_deleteTilesAtRow - 1);
             //Re-sync the transforms so the players raycasts do not miss
-            Physics.SyncTransforms();
+            //Physics.SyncTransforms();
         }
     }
     /// <summary>
@@ -703,11 +827,13 @@ public struct TileInfo
     /// </summary>
     /// <param name="tilePrefab">The prefab for standard ground</param>
     /// <param name="tileSlope">The prefab for slopes</param>
+    /// <param name="tileIndoor">The prefab for indoors</param>
     /// <param name="laneWidth">The width of a tile</param>
     /// <param name="tileHeight">The height of a tile</param>
     /// <param name="tileLength">The length of a tile</param>
     /// <param name="posOffset">The position offset of the tile from the origin</param>
-    public void GenerateTiles(GameObject tilePrefab, GameObject tileSlope, float laneWidth, float tileHeight, float tileLength, Vector3 posOffset)
+    /// <param name="neighbourHeights">The heights of neighbouring tiles in order, previous, left, right</param>
+    public void GenerateTiles(GameObject tilePrefab, GameObject tileSlope, GameObject tileIndoor, float laneWidth, float tileHeight, float tileLength, Vector3 posOffset, int[] neighbourHeights)
     {   //Make sure the tile has not finished its generation before continuing
         if (_isGenerated)
         {
@@ -724,9 +850,9 @@ public struct TileInfo
         Renderer r = obj.GetComponent<Renderer>();
         r.material.SetTextureScale("_WallTex", new Vector2(1, _isRamp ? _height : _height + 1));
         r.material.SetTextureScale("_MainTex", new Vector2(1, tileLength));
-        //Temporary debugging for doors
-        if (_hasIndoors)
-            r.material.SetColor("_Color", Color.green);
+        r.material.SetFloat("_Back", (neighbourHeights[0] + 0.5f) * tileHeight + posOffset.y);
+        r.material.SetFloat("_Left", (neighbourHeights[1] + 0.5f) * tileHeight + posOffset.y);
+        r.material.SetFloat("_Right", (neighbourHeights[2] + 0.5f) * tileHeight + posOffset.y);
         //Store it
         m_objectsOnTile.Add(obj);
         //If we have a ramp, create it
@@ -737,6 +863,14 @@ public struct TileInfo
             //Scale the ramp to fit the tile
             obj.transform.localScale = new Vector3(laneWidth, tileHeight, tileLength);
             //Store it
+            m_objectsOnTile.Add(obj);
+        }
+        //Create an indoor object if its needed
+        if (_hasIndoors)
+        {
+            obj = GameObject.Instantiate(tileIndoor, new Vector3(laneWidth * _lane + posOffset.x, _indoorHeight * tileHeight + posOffset.y, _forwardPoint * tileLength + posOffset.z), Quaternion.identity);
+            obj.transform.localScale = new Vector3(laneWidth, tileHeight, tileLength);
+
             m_objectsOnTile.Add(obj);
         }
         //The tile has been generated and cannot be edited
@@ -759,6 +893,14 @@ public struct TileInfo
     public void AddObstacle(ref GameObject obstacle)
     {   //Store the object
         m_objectsOnTile.Add(obstacle);
+    }
+    /// <summary>
+    /// Toggles the objects on the tile
+    /// </summary>
+    public void Toggle(bool on)
+    {
+        foreach (GameObject g in m_objectsOnTile)
+            g.SetActive(on);
     }
 }
 /// <summary>

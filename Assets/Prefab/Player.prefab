@@ -65,7 +65,7 @@ MonoBehaviour:
     slopeAngle: 50
     ground:
       serializedVersion: 2
-      m_Bits: 1
+      m_Bits: 1537
     positionOffsetIsGlobal: 1
     rotationIsGlobal: 1
   direction:
@@ -84,14 +84,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08d37e420eda50a499bfc5a085bf9600, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnLaneChange:
+    m_PersistentCalls:
+      m_Calls: []
   _runSpeed: 10
   _jumpVelocity: 7
   _stepHeight: 0.35
-  _laneSwapTime: 0.1
+  _laneSwapTime: 0.15
   _rollReactionTime: 0.3
   _coyoteTime: 0.2
   _fallKillVelocity: 10
-  _vaultRange: 2.5
+  _vaultRange: 3
   _baseScoreMultiplier: 100
   defaultModelInfo:
     _modelAvatar: {fileID: 9000000, guid: 2dc526a87c49416478b13f971cef333c, type: 3}

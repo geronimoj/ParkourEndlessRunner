@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 /// <summary>
 /// Controls everything player related
 /// </summary>
@@ -103,6 +104,8 @@ public class Player : MonoBehaviour
     /// Store a static reference to this game to make it easier to read and write to the player
     /// </summary>
     public static Player player = null;
+
+    public UnityEvent OnLaneChange;
     /// <summary>
     /// The speed at which the player runs in global units per second
     /// </summary>
@@ -280,6 +283,10 @@ public class Player : MonoBehaviour
     /// </summary>
     private float trueGravity = 0;
     /// <summary>
+    /// The time the player began running
+    /// </summary>
+    private float startTime = 0;
+    /// <summary>
     /// Returns true if the player is dead
     /// </summary>
     public bool IsDead => _r.RagdollOn;
@@ -294,6 +301,10 @@ public class Player : MonoBehaviour
     /// </summary>
     [Tooltip("The model that should be swapped to when calling SwapModel")]
     public static ModelInfo modelToSwapTo = new ModelInfo();
+    /// <summary>
+    /// The index of the players current model
+    /// </summary>
+    public static int s_modelIndex = 0;
     /// <summary>
     /// Gets references to components
     /// </summary>
@@ -408,7 +419,12 @@ public class Player : MonoBehaviour
                 doRagdoll = true;
                 //Dissable the speed lines
                 _particleTransform.gameObject.SetActive(false);
+                //Store the time the run lasted for
+                startTime = Time.time - startTime;
+                //Store the highScore
+                Highscore.AddScore(new Highscore((uint)s_modelIndex, (int)Score, startTime));
             }
+            OnLaneChange.Invoke();
         }
 
         //If the player died, ragdoll them and don't move
@@ -442,11 +458,13 @@ public class Player : MonoBehaviour
             {
                 _lane--;
                 t_laneSwapTimer = 0;
+                OnLaneChange.Invoke();
             }
             else if (_lane != _lg.NumberOfLanes - 1 && _swapLane > 0)
             {
                 _lane++;
                 t_laneSwapTimer = 0;
+                OnLaneChange.Invoke();
             }
         }
         //Increment the timer
@@ -469,8 +487,8 @@ public class Player : MonoBehaviour
     {   //Jump or Vault
         if (onGround && !m_inAnimation && _jump)
         {
-            //Perform a raycast forwards to see if we detect a vaultable object
-            if (Physics.Raycast(_pc.colInfo.GetLowerPoint(), Vector3.forward, out RaycastHit hit, _pc.colInfo.TrueRadius + _vaultRange)
+            //Perform a raycast forwards to see if we detect a vaultable object                                                     //Vault obstacles exist on the default layer
+            if (Physics.Raycast(_pc.colInfo.GetLowerPoint(), Vector3.forward, out RaycastHit hit, _pc.colInfo.TrueRadius + _vaultRange, LayerMask.GetMask("Default"))
                 //If the hit object is vaultable, do a vault
                 && hit.transform.CompareTag("Vaultable"))
             {   //Ignore the collider of the vaultable object as otherwise we need to freeze the players Y and change their collider
@@ -552,6 +570,10 @@ public class Player : MonoBehaviour
         _cc.FollowHead = true;
         m_inAnimation = true;
     }
+
+    public void EnterDoor() => m_inAnimation = true;
+
+    public void ExitDoor() => m_inAnimation = false;
     /// <summary>
     /// Resets the players position, score, ragdoll state, animation and input variables
     /// </summary>
@@ -572,6 +594,8 @@ public class Player : MonoBehaviour
         _score = 0;
         //Set the starting lane for the player
         _prevLane = _lane = _lg.NumberOfLanes / 2; ;
+        //Reset the players layer masks for moving as they will need to be redone if they die indoors
+        _pc.colInfo.ground = LayerMask.GetMask("Default", "Indoors", "OutDoors");
         //Set the position of the player to spawn ever so slightly above the ground
         Vector3 pos;
         pos.y = _pc.colInfo.LowerHeight + _pc.colInfo.CollisionOffset * 2 + _lg.LayerHeight * 1.5f + _lg.GenerateOffset.y;
@@ -585,6 +609,8 @@ public class Player : MonoBehaviour
         m_inAnimation = false;
         _cc.FollowHead = false;
         _swapLane = 0;
+        //Store the time the player started running
+        startTime = Time.time;
     }
     /// <summary>
     /// Swaps the model to the model in Model To Swap To

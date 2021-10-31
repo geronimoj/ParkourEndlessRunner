@@ -62,12 +62,16 @@ public class MainMenuManager : Manager
     [Tooltip("The UI that appears when selecting a level")]
     [SerializeField]
     private GameObject _levelMenu = null;
+
+    public static bool s_modelsLoaded = false;
     /// <summary>
     /// Makes sure everything has been assigned correctly
     /// </summary>
     private void Start()
     {   //Initialise objectes to 0 to avoid null reference exception
         _objectsToCleanUp = new GameObject[0];
+        //Load the highscores
+        Highscore.LoadScores();
         //Make sure the menus have been assigned
         Debug.Assert(_rebindMenu != null, "Rebind Menu not assigned!");
         _rebindMenu.SetActive(false);
@@ -78,11 +82,8 @@ public class MainMenuManager : Manager
         Debug.Assert(_levelMenu != null, "Level Menu not assigned!");
         _levelMenu.SetActive(false);
     }
-    /// <summary>
-    /// Spawns the player models
-    /// </summary>
-    [ContextMenu("Load Player Models")]
-    public void LoadPlayerModels()
+
+    public void EnableModelMenu()
     {
         //Dissable the other menus
         _tutorialMenu.SetActive(false);
@@ -92,6 +93,16 @@ public class MainMenuManager : Manager
         UnloadPlayerModels();
         //Re-enable the model menu as UnloadPlayerModels set it to false
         _modelMenu.SetActive(true);
+
+        LoadPlayerModels();
+    }
+    /// <summary>
+    /// Spawns the player models
+    /// </summary>
+    [ContextMenu("Load Player Models")]
+    public void LoadPlayerModels()
+    {
+        s_modelsLoaded = true;
         //Re-size the objects to clean up array
         _objectsToCleanUp = new GameObject[_playerModels.Length];
         //Loop over the player models and create them in the scene and store them in the objects to clean up
@@ -112,8 +123,8 @@ public class MainMenuManager : Manager
             Destroy(g);
         //Set the size of the objects to be 0
         _objectsToCleanUp = new GameObject[0];
-        //Disable the model menu since there are no models so no need to keep it up
-        _modelMenu.SetActive(false);
+
+        s_modelsLoaded = false;
     }
     /// <summary>
     /// Toggles the rebindmenu on and off. Handles if other menus should be enabled at that time
@@ -123,6 +134,8 @@ public class MainMenuManager : Manager
         _rebindMenu.SetActive(!_rebindMenu.activeSelf);
         //Make sure other menus are set to false
         UnloadPlayerModels();
+        //Disable the model menu since there are no models so no need to keep it up
+        _modelMenu.SetActive(false);
         _tutorialMenu.SetActive(false);
         _levelMenu.SetActive(false);
     }
@@ -134,6 +147,8 @@ public class MainMenuManager : Manager
         _tutorialMenu.SetActive(!_tutorialMenu.activeSelf);
         //Make sure other menaus are set to false
         UnloadPlayerModels();
+        //Disable the model menu since there are no models so no need to keep it up
+        _modelMenu.SetActive(false);
         _rebindMenu.SetActive(false);
         _levelMenu.SetActive(false);
     }
@@ -143,6 +158,8 @@ public class MainMenuManager : Manager
         _levelMenu.SetActive(true);
 
         UnloadPlayerModels();
+        //Disable the model menu since there are no models so no need to keep it up
+        _modelMenu.SetActive(false);
         _rebindMenu.SetActive(false);
         _tutorialMenu.SetActive(false);
     }
@@ -155,7 +172,11 @@ public class MainMenuManager : Manager
     /// </summary>
     public void CloseApp()
     {
+        Highscore.SaveScores();
         Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
     /// <summary>
     /// Returns the ModelInfo of the selected model

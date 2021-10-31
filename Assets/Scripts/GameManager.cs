@@ -44,8 +44,8 @@ public class GameManager : Manager
 
         if (!m_pauseMenu.activeSelf && Input.GetKeyDown(KeyCode.Return))
         {
-            m_lg.CreateLevel();
             m_p.ResetPlayer();
+            m_lg.CreateLevel();
         }
 
         m_deadText.SetActive(m_p.IsDead);
